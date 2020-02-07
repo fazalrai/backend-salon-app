@@ -80,7 +80,7 @@ SalonRouter.put("/:id", async (req, res) => {
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await UserTable.findOne({
 				SalonOwnerphoneNumber: req.body.phoneNumber,
-				_id: { $ne: req.params.id }
+				_id: { $ne: decode.id }
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
