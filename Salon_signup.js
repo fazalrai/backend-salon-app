@@ -61,21 +61,21 @@ SalonRouter.post("/", async (req, res) => {
 	}
 });
 
-SalonRouter.put("/:id", async (req, res) => {
+SalonRouter.put("/", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			try {
-				var user2 = await SalonTable.findById(req.params.id);
+				var user2 = await SalonTable.findById(decode.id);
 			} catch (ex) {
 				return res.status(400).send("Invalid id");
 			}
 
 			const user = await SalonTable.findOne({
 				SalonOwnerEmail: req.body.email,
-				_id: { $ne: req.params.id }
+				_id: { $ne: decode.id }
 			});
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await UserTable.findOne({
@@ -90,6 +90,32 @@ SalonRouter.put("/:id", async (req, res) => {
 				(user2.SalonOwnerphoneNumber = req.body.phoneNumber),
 				(user2.SalonOwnerCnic = req.body.cnic),
 				(user2.SalonName = req.body.salonname);
+			try {
+				const result = await user2.save();
+				return res.status(200).send(result);
+			} catch (exc) {
+				return res.status(400).send(ex.message);
+			}
+		}
+	} catch (exc) {
+		return res.status(400).send("Invalid Token");
+	}
+});
+
+SalonRouter.put("/update/password", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			try {
+				var user2 = await SalonTable.findById(decode.id);
+			} catch (ex) {
+				return res.status(400).send("Invalid id");
+			}
+
+			user2.password = req.body.password;
+
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);

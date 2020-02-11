@@ -12,26 +12,26 @@ const userSchema = new monogoes.Schema({
 });
 const UserTable = monogoes.model("UserTable", userSchema);
 
-Userrouter.put("/:id", async (req, res) => {
+Userrouter.put("/", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			try {
-				var user2 = await UserTable.findById(req.params.id);
+				var user2 = await UserTable.findById(decode.id);
 			} catch (ex) {
 				return res.status(400).send("Invalid id");
 			}
 
 			const user = await UserTable.findOne({
 				UserEmail: req.body.email,
-				_id: { $ne: req.params.id }
+				_id: { $ne: decode.id }
 			});
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await UserTable.findOne({
 				phoneNumber: req.body.phnnbr,
-				_id: { $ne: req.params.id }
+				_id: { $ne: decode.id }
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
@@ -74,7 +74,7 @@ Userrouter.post("/", async (req, res) => {
 	}
 
 	let user1 = await UserTable.findOne({ phoneNumber: req.body.phnnbr });
-	console.log(user1);
+	//	console.log(user1);
 	if (user1) {
 		return res.status(400).send("Phone number already exist");
 	}
@@ -90,7 +90,10 @@ Userrouter.post("/", async (req, res) => {
 	});
 	try {
 		const result = await newuser.save();
-		const token = jwt.sign({ login: true }, "login_jwt_privatekey");
+		const token = jwt.sign(
+			{ login: true, id: result._id },
+			"login_jwt_privatekey"
+		);
 
 		return res
 			.status(200)
@@ -99,11 +102,32 @@ Userrouter.post("/", async (req, res) => {
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
-	//await newuser.save().then(rzlt=> res.status(200).send(rzlt))
-	//.catch(err=>res.status(400).send(err))
-	//return res.status(200).send(result);
 });
 
+Userrouter.put("/update/password", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			try {
+				var user2 = await UserTable.findById(decode.id);
+			} catch (ex) {
+				return res.status(400).send("Invalid id");
+			}
+
+			user2.password = req.body.password;
+			try {
+				const result = await user2.save();
+				return res.status(200).send(result);
+			} catch (exc) {
+				return res.status(400).send(ex.message);
+			}
+		}
+	} catch (exc) {
+		return res.status(400).send("Invalid Token");
+	}
+});
 //async function Creatuser() {
 //	const newuser = new UserTable({
 //UserName: req.body.UserName,

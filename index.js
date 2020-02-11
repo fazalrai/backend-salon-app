@@ -9,6 +9,7 @@ const superadminrouter = require("./Superadmin");
 const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const schedule_router = require("./Schedule");
+const Reset_password_router = require("./ResetPassword");
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
@@ -52,6 +53,10 @@ app.use(
 	service_appointment_router.ServiceAppointmentRouter
 );
 
+app.use(
+	"/Digital_Saloon.com/api/Reset/password",
+	Reset_password_router.Reset_password_router
+);
 monogoes
 	.connect("mongodb://localhost/fypdatabase")
 	.then(() => console.log("connected successfuly"))
