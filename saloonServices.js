@@ -120,10 +120,13 @@ saloonServicesRouter.post("/", async (req, res) => {
 
 				try {
 					const result = await newService.save();
-					const Salon = await SalonTable.find({ _id: decode.id });
-					const addservice = SalonTable.update({
-						$push: { ListOfSalonServices: newService._id }
-					});
+					//	const Salon = await SalonTable.find({ _id: decode.id });
+					const addservice = await SalonTable.update(
+						{
+							_id: decode.id
+						},
+						{ $push: { ListOfSalonServices: result._id } }
+					);
 					return res.status(200).send(result);
 				} catch (ex) {
 					return res.status(400).send(ex.message);

@@ -1,7 +1,7 @@
 const monogoes = require("mongoose");
 const SalonTable = require("./Salon_signup");
 const express = require("express");
-
+const jwt = require("jsonwebtoken");
 const SuperadminRouter = express.Router();
 const SuperAdminSchema = new monogoes.Schema({
 	SuperAdminName: { type: String, required: true, minlength: 3, maxlength: 20 },
@@ -15,8 +15,6 @@ SuperadminRouter.post("/", async (req, res) => {
 	//console.log(user);
 	if (user) {
 		return res.status(400).send("email already exist");
-	} else {
-		//res.send("valid email");
 	}
 	const newsuperadmin = new SuperAdminTable({
 		SuperAdminName: req.body.name,
@@ -26,7 +24,10 @@ SuperadminRouter.post("/", async (req, res) => {
 	});
 	try {
 		const result = await newsuperadmin.save();
-		const token = jwt.sign({ Super_admin_login: true }, "login_jwt_privatekey");
+		const token = jwt.sign(
+			{ Super_admin_login: true, id: result._id },
+			"login_jwt_privatekey"
+		);
 		return res
 			.status(200)
 			.header("x-auth-token", token)
@@ -48,7 +49,8 @@ SuperadminRouter.put("/:id", async (req, res) => {
 				return res.status(400).send("Invalid id");
 			}
 			const user = await SuperAdminTable.findOne({
-				SuperAdminEmail: req.body.email
+				SuperAdminEmail: req.body.email,
+				_id: { $ne: req.params.id }
 			});
 			if (user) return res.status(400).send("Email already exist");
 
@@ -61,11 +63,11 @@ SuperadminRouter.put("/:id", async (req, res) => {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (exc) {
-		return res.status(400).send("Invalid Token");
+		return res.status(400).send("invalid token");
 	}
 });
 

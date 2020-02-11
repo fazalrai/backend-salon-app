@@ -33,10 +33,9 @@ ServiceAppointmentRouter.post("/", async (req, res) => {
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
-
 		if (decode) {
 			const appointment = new ServiceAppointmentTable({
-				customer_id: req.body.customerid,
+				customer_id: decode.id,
 				service_id: req.body.serviceid,
 				service_status: req.body.servicestatus
 			});
@@ -44,7 +43,7 @@ ServiceAppointmentRouter.post("/", async (req, res) => {
 				const result = await appointment.save();
 				return res.status(200).send(result);
 			} catch (error) {
-				return res.status(400).send(result);
+				return res.status(400).send(error.message);
 			}
 		}
 	} catch (exc) {

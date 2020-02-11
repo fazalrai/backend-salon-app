@@ -5,12 +5,12 @@ const SalonOwner_login_router = express.Router();
 SalonOwner_login_router.post("/", async (req, res) => {
 	try {
 		const user = await SalonTable.findOne({
-			saloonOwnerEmail: req.body.email,
+			SalonOwnerEmail: req.body.email,
 			password: req.body.password
 		});
 		if (user) {
 			const token = jwt.sign(
-				{ Salon_Owner_login: true },
+				{ Salon_Owner_login: true, id: user._id },
 				"login_jwt_privatekey"
 			);
 			return res
@@ -18,7 +18,7 @@ SalonOwner_login_router.post("/", async (req, res) => {
 				.header("x-auth-token", token)
 				.send(user);
 		} else {
-			return res.status(400).send(" Invalid login ");
+			return res.status(400).send("Invalid login");
 		}
 	} catch (error) {
 		return res.status(400).send(error.message);

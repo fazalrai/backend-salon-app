@@ -74,7 +74,7 @@ Userrouter.post("/", async (req, res) => {
 	}
 
 	let user1 = await UserTable.findOne({ phoneNumber: req.body.phnnbr });
-	console.log(user1);
+	//	console.log(user1);
 	if (user1) {
 		return res.status(400).send("Phone number already exist");
 	}
@@ -89,13 +89,22 @@ Userrouter.post("/", async (req, res) => {
 		phoneNumber: req.body.phnnbr
 	});
 	try {
-		const result = await newuser.save();
-		const token = jwt.sign({ login: true }, "login_jwt_privatekey");
+		await newuser
+			.save()
+			.then(result => {
+				const token = jwt.sign(
+					{ newuser_login: true, id: result._id },
+					"login_jwt_privatekey"
+				);
+				return res
+					.header("x-auth-token", token)
+					.status(200)
+					.send(result);
+			})
 
-		return res
-			.status(200)
-			.header("x-auth-token", token)
-			.send(result);
+			.catch(error => {
+				return res.status(400).send(error.message);
+			});
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}

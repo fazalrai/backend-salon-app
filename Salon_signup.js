@@ -43,12 +43,28 @@ SalonRouter.post("/", async (req, res) => {
 			SalonOwnerCnic: req.body.cnic,
 			SalonName: req.body.salonname
 		});
+
 		try {
-			const result = await newSalon.save();
-			const token = jwt.sign(
-				{ newSalon_account: true, id: result._id },
-				"login_jwt_privatekey"
-			);
+			await newSalon
+				.save()
+				.then(result => {
+					const token = jwt.sign(
+						{ newSalon_account: true, id: result._id },
+						"login_jwt_privatekey"
+					);
+					return res
+						.header("x-auth-token", token)
+						.status(200)
+						.send(result);
+				})
+
+				.catch(error => {
+					return res.status(400).send(error.message);
+				});
+			//const token = jwt.sign(
+			//	{ newSalon_account: true, id: result._id },
+			//	"login_jwt_privatekey"
+			//);
 			return res
 				.status(200)
 				.header("x-auth-token", token)
@@ -78,7 +94,7 @@ SalonRouter.put("/:id", async (req, res) => {
 				_id: { $ne: req.params.id }
 			});
 			if (user) return res.status(400).send("Email already exist");
-			let user1 = await UserTable.findOne({
+			let user1 = await SalonTable.findOne({
 				SalonOwnerphoneNumber: req.body.phoneNumber,
 				_id: { $ne: req.params.id }
 			});
@@ -98,7 +114,7 @@ SalonRouter.put("/:id", async (req, res) => {
 			}
 		}
 	} catch (exc) {
-		return res.status(400).send("Invalid Token");
+		return res.status(400).send(exc.message);
 	}
 });
 module.exports.SalonRouter = SalonRouter;
