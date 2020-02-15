@@ -55,7 +55,6 @@ SuperadminRouter.put("/", async (req, res) => {
 
 			user2.SuperAdminEmail = req.body.email;
 			user2.SuperAdminName = req.body.name;
-			user2.password = req.body.password;
 			user2.isAdmin = req.body.isAdmin;
 
 			try {

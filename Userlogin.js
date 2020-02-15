@@ -1,19 +1,28 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const { UserTable } = require("./UsersSignup");
 const jwt = require("jsonwebtoken");
 const User_login_router = express.Router();
 User_login_router.post("/", async (req, res) => {
 	try {
 		const user = await UserTable.findOne({
-			UserEmail: req.body.useremail,
-			password: req.body.password
+			UserEmail: req.body.email
 		});
-		if (user) {
-			const token = jwt.sign({ login: true }, "login_jwt_privatekey");
-			res.status(200).send(token);
-		} else {
-			res.status(400).send(" Invalid login ");
-		}
+
+		if (!user) return res.send(400).send("Invalid email");
+
+		const validpassword = await bcrypt.compare(
+			req.body.password,
+			user.password
+		);
+		//return res.status(400).send(validpassword);
+		if (!validpassword) return res.status(400).send("invalid password");
+
+		const token = await jwt.sign(
+			{ login: true, id: user._id },
+			"login_jwt_privatekey"
+		);
+		return res.status(200).send(token);
 	} catch (error) {
 		return res.status(400).send(error.message);
 	}

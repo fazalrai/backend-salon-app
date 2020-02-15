@@ -10,11 +10,16 @@ const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const schedule_router = require("./Schedule");
 const Reset_password_router = require("./ResetPassword");
+const connectDB = require("./connectivity");
+const helmet = require("helmet");
+const compression = require("compression");
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
 //const cors = require("cors");
 const app = express();
+app.use(helmet);
+app.use(compression);
 app.use(express.json());
 /*if(!config.get('jwtpk')){
     console.log("FATAL error...jwt primary key is not defined");
@@ -57,10 +62,15 @@ app.use(
 	"/Digital_Saloon.com/api/Reset/password",
 	Reset_password_router.Reset_password_router
 );
+
+connectDB();
+
 monogoes
 	.connect("mongodb://localhost/fypdatabase")
 	.then(() => console.log("connected successfuly"))
-	.catch(() => console.error("Couldnot connected to mongodb..", err));
+	.catch(() => console.error("Couldnot connected to mongodb.."));
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("Listening succesfully on port ...", port));
 //UserSignup_router.Creatuser();
+//module.exports.db = db;
+//console.log();

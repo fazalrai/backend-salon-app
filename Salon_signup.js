@@ -2,6 +2,7 @@ const monogoes = require("mongoose");
 const express = require("express");
 const SalonRouter = express.Router();
 const jwt = require("jsonwebtoken");
+var name;
 const SalonSchema = new monogoes.Schema({
 	SalomOwnerName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	SalonOwnerEmail: { type: String, required: true, minlength: 7 },
@@ -86,7 +87,6 @@ SalonRouter.put("/", async (req, res) => {
 
 			(user2.SalomOwnerName = req.body.name),
 				(user2.SalonOwnerEmail = req.body.email),
-				(user2.password = req.body.password),
 				(user2.SalonOwnerphoneNumber = req.body.phoneNumber),
 				(user2.SalonOwnerCnic = req.body.cnic),
 				(user2.SalonName = req.body.salonname);
@@ -102,7 +102,7 @@ SalonRouter.put("/", async (req, res) => {
 	}
 });
 
-SalonRouter.put("/update/password", async (req, res) => {
+SalonRouter.put("/change/password", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
@@ -113,19 +113,79 @@ SalonRouter.put("/update/password", async (req, res) => {
 			} catch (ex) {
 				return res.status(400).send("Invalid id");
 			}
-
-			user2.password = req.body.password;
-
-			try {
-				const result = await user2.save();
-				return res.status(200).send(result);
-			} catch (exc) {
-				return res.status(400).send(ex.message);
+			if (user2.password === req.body.oldpassword) {
+				user2.password = req.body.newpassword;
+				try {
+					const result = await user2.save();
+					return res.status(200).send(result);
+				} catch (exc) {
+					return res.status(400).send(ex.message);
+				}
+			} else {
+				return res.status(400).send("Old Password didnot matched");
 			}
 		}
 	} catch (exc) {
-		return res.status(400).send("Invalid Token");
+		return res.status(400).send("Invalid token");
 	}
 });
+
+SalonRouter.post("/forgot/password", async (req, res) => {
+	name = SalonTable.findOne({ SalonOwnerphoneNumber: req.body.phnnbr });
+	if (name) {
+		const customerId = "9F66B2BC-623D-4351-8687-884B5A723C92";
+		const apiKey =
+			"xNJ8n/FtprpI6XcPcz/4oWBy3wlaGh9na/4xEMtNlqitYaAKnEf5JSqbCh6oPaBE0yaxOOAKX6bmPg6cqaMeaQ==";
+		const rest_endpoint = "https://rest-api.telesign.com";
+		const timeout = 10 * 1000; // 10 secs
+
+		const client = new TeleSignSDK(
+			customerId,
+			apiKey,
+			rest_endpoint,
+			timeout // optional
+			// userAgent
+		);
+
+		const phoneNumber = req.body.phnnbr; //req.body.phnnbr;
+		digit = Math.floor(random(1000, 10000));
+		const messageType = "ARN";
+
+		//console.log("## MessagingClient.message ##");
+
+		function messageCallback(error, responseBody) {
+			if (error === null) {
+				//console.log(
+				//	`Messaging response for messaging phone number: ${phoneNumber}` +
+				//		` => code: ${responseBody["status"]["code"]}` +
+				//		`, description: ${responseBody["status"]["description"]}`
+				//);
+				return res
+					.status(200)
+					.send("enter the verfication code send to your number");
+			} else {
+				return res.status(400).send(error);
+				//console.error("Unable to send message. " + error);
+			}
+		}
+		client.sms.message(messageCallback, phoneNumber, message, messageType);
+	} else {
+		return res.status(400).send("Invalid phnnbr");
+	}
+});
+SalonRouter.put("/add_new_password", async (req, res) => {
+	name.password = req.body.password;
+	try {
+		const result = await name.save();
+		return res.status(200).send(result);
+	} catch (exc) {
+		return res.status(400).send(ex.message);
+	}
+});
+
+function random(low, high) {
+	return Math.random() * (high - low) + low;
+}
+
 module.exports.SalonRouter = SalonRouter;
 module.exports.SalonTable = SalonTable;
