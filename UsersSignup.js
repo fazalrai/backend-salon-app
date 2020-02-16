@@ -1,44 +1,56 @@
 const monogoes = require("mongoose");
-
+var TeleSignSDK = require("telesignsdk");
+const nodemailer = require("nodemailer");
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const Userrouter = express.Router();
-
+var name;
 const userSchema = new monogoes.Schema({
 	UserName: { type: String, required: true, minlength: 3, maxlength: 20 },
-	UserEmail: { type: String, required: true, minlength: 7 },
-	password: { type: String, required: true, minlength: 8, maxlength: 25 },
+	UserEmail: { type: String, required: true },
+	password: { type: String, required: true, minlength: 8, maxlength: 125 },
 	phoneNumber: { type: Number, required: true, minlength: 10, maxlength: 15 }
 });
+
+const ttl_schema = new monogoes.Schema({
+	UserEmail: { type: String, required: true },
+	createdAt: { type: Date, required: true },
+	token: { type: Number, required: true }
+});
+
+const ttl_table = monogoes.model("ttl_table", ttl_schema);
+
 const UserTable = monogoes.model("UserTable", userSchema);
 
-Userrouter.put("/:id", async (req, res) => {
+Userrouter.put("/", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			try {
-				var user2 = await UserTable.findById(req.params.id);
+				var user2 = await UserTable.findById(decode.id);
 			} catch (ex) {
 				return res.status(400).send("Invalid id");
 			}
 
 			const user = await UserTable.findOne({
 				UserEmail: req.body.email,
-				_id: { $ne: req.params.id }
+				_id: { $ne: decode.id }
 			});
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await UserTable.findOne({
 				phoneNumber: req.body.phnnbr,
-				_id: { $ne: req.params.id }
+				_id: { $ne: decode.id }
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
 			(user2.UserName = req.body.name),
 				(user2.UserEmail = req.body.email),
-				(user2.password = req.body.password),
 				(user2.phoneNumber = req.body.phnnbr);
+
+			//	user2.password = req.body.password;
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
@@ -69,10 +81,7 @@ Userrouter.post("/", async (req, res) => {
 	//console.log(user);
 	if (user) {
 		return res.status(400).send("email already exist");
-	} else {
-		//res.send("valid email");
 	}
-
 	let user1 = await UserTable.findOne({ phoneNumber: req.body.phnnbr });
 	//	console.log(user1);
 	if (user1) {
@@ -82,13 +91,18 @@ Userrouter.post("/", async (req, res) => {
 	//		res.send("valid phnnbr");
 	//}
 	//console.log(req.body);
+
 	const newuser = new UserTable({
 		UserName: req.body.name,
 		UserEmail: req.body.email,
 		password: req.body.password,
 		phoneNumber: req.body.phnnbr
 	});
+
+	const salt = await bcrypt.genSalt(10);
+	newuser.password = await bcrypt.hash(newuser.password, salt);
 	try {
+<<<<<<< HEAD
 		await newuser
 			.save()
 			.then(result => {
@@ -101,6 +115,13 @@ Userrouter.post("/", async (req, res) => {
 					.status(200)
 					.send(result);
 			})
+=======
+		const result = await newuser.save();
+		const token = jwt.sign(
+			{ login: true, id: result._id },
+			"login_jwt_privatekey"
+		);
+>>>>>>> fazal
 
 			.catch(error => {
 				return res.status(400).send(error.message);
@@ -108,25 +129,170 @@ Userrouter.post("/", async (req, res) => {
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
-	//await newuser.save().then(rzlt=> res.status(200).send(rzlt))
-	//.catch(err=>res.status(400).send(err))
-	//return res.status(200).send(result);
 });
 
-//async function Creatuser() {
-//	const newuser = new UserTable({
-//UserName: req.body.UserName,
-//UserEmail: req.body.UserEmail,
-//password: req.body.password,
-//phoneNumber: req.body.phoneNumber
-//		UserName: "fazal rai",
-//		UserEmail: "abc4343444",
-//		password: "abc12333",
-//	phoneNumber: 202032334
-//	});
+Userrouter.put("/change/password", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			var user2 = await UserTable.findById(decode.id);
+			if (!user2) return res.status(400).send("Invalid id");
 
-//	const result = await newuser.save();
-//}
+			const validpassword = await bcrypt.compare(
+				req.body.oldpassword,
+				user2.password
+			);
+			if (!validpassword) return res.status(400).send(validpassword);
+			const salt = await bcrypt.genSalt(10);
+			const new_hased_password = await bcrypt.hash(
+				req.body.confirmpassword,
+				salt
+			);
+			user2.password = new_hased_password;
+			try {
+				const result = await user2.save();
+				return res.status(200).send(result);
+			} catch (exc) {
+				return res.status(400).send(ex.message);
+			}
+		}
+	} catch (exc) {
+		return res.status(400).send("Invalid token");
+	}
+});
+
+Userrouter.post("/forgot/password", async (req, res) => {
+	const name = await UserTable.findOne({ UserEmail: req.body.email });
+	if (name) {
+		let transporter = nodemailer.createTransport({
+			service: "Gmail",
+			//port: 587,
+			secure: false,
+
+			auth: {
+				user: "fa16-bcs-347@cuilahore.edu.pk",
+				pass: "pmlnpmln1234"
+			}
+		});
+
+		let mailOptions = {
+			from: "fa16-bcs-347@cuilahore.edu.pk",
+			to: req.body.email,
+			subject: "Verfication Code",
+			text: Math.floor(random(1000, 10000)).toString()
+		};
+
+		transporter.sendMail(mailOptions, function(err, info) {
+			if (err) {
+				return res.status(400).send(err);
+			} else {
+				console.log("sent successfully");
+				//return res
+				//	.status(200)
+				//	.send("enter the verfication code send to your number");
+			}
+		});
+	} else {
+		return res.status(400).send(err);
+
+		//return res.status(400).send("invalid email");
+	}
+	const new_token = new ttl_table({
+		createdAt: new Date(),
+		Userid: user._id,
+		token: parseInt(mailOptions.text)
+	});
+
+	const already_token = await ttl_table
+		.findOne({ Userid: user._id })
+		.select({ token });
+	if (already_token) {
+		already_token.token = new_token.token;
+		try {
+			let save_token = await already_token.save();
+			return res.status(200).send("token sent successfully", save_token);
+		} catch (exc) {}
+	} else {
+		try {
+			let save_token = await new_token.save();
+			return res.status(200).send("token sent successfully", save_token);
+		} catch (exc) {
+			return res.status(400).send(exc.message);
+		}
+	}
+});
+
+function random(low, high) {
+	return Math.random() * (high - low) + low;
+}
+Userrouter.post("/verify/code", async (req, res) => {
+	const result = await ttl_table.findOne({ token: req.body.token });
+	if (result) {
+		return res.status(200).send(result);
+	} else {
+		return res.status(400).send("Invalid code");
+	}
+});
+
+//below one is for phnnbr
+Userrouter.post("/forgot/pasord", async (req, res) => {
+	name = await UserTable.findOne({ UserEmail: req.body.email });
+	if (name) {
+		const customerId = "9F66B2BC-623D-4351-8687-884B5A723C92";
+		const apiKey =
+			"xNJ8n/FtprpI6XcPcz/4oWBy3wlaGh9na/4xEMtNlqitYaAKnEf5JSqbCh6oPaBE0yaxOOAKX6bmPg6cqaMeaQ==";
+		const rest_endpoint = "https://rest-api.telesign.com";
+		const timeout = 10 * 1000; // 10 secs
+
+		const client = new TeleSignSDK(
+			customerId,
+			apiKey,
+			rest_endpoint,
+			timeout // optional
+			// userAgent
+		);
+
+		const phoneNumber = req.body.phnnbr; //req.body.phnnbr;
+		digit = Math.floor(random(1000, 10000));
+		const messageType = "ARN";
+
+		//console.log("## MessagingClient.message ##");
+
+		function messageCallback(error, responseBody) {
+			if (error === null) {
+				//console.log(
+				//	`Messaging response for messaging phone number: ${phoneNumber}` +
+				//		` => code: ${responseBody["status"]["code"]}` +
+				//		`, description: ${responseBody["status"]["description"]}`
+				//);
+				return res
+					.status(200)
+					.send("enter the verfication code send to your number");
+			} else {
+				return res.status(400).send(error);
+				//console.error("Unable to send message. " + error);
+			}
+		}
+		client.sms.message(messageCallback, phoneNumber, message, messageType);
+	} else {
+		return res.status(400).send("Invalid phnnbr");
+	}
+});
+Userrouter.put("/add_new_password", async (req, res) => {
+	console.log(name);
+	name.password = req.body.password;
+	try {
+		const result = await name.save();
+		return res.status(200).send(result);
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
+});
+function random(low, high) {
+	return Math.random() * (high - low) + low;
+}
 
 module.exports.Userrouter = Userrouter;
 module.exports.UserTable = UserTable;

@@ -30,6 +30,23 @@ saloonServicesRouter.get("/", async (req, res) => {
 	}
 });
 
+saloonServicesRouter.get("/Filter_by_Price", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+
+		if (decode) {
+			const allservices = await SalonServicesTable.find().sort({
+				servicePrice: 1
+			});
+			res.status(200).send(allservices);
+		}
+	} catch (exc) {
+		res.status(400).send("Invalid token");
+	}
+});
+
 saloonServicesRouter.get("/:id", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");

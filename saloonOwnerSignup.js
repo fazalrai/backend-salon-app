@@ -105,8 +105,7 @@ saloonOwnerRouter.put("/:id", async (req, res) => {
 			(user2.saloonName = req.body.salonname),
 				(user2.saloonOwnerName = req.body.saloonownerName),
 				(user2.saloonOwnerEmail = req.body.email),
-				(user2.saloonOwnerContact = req.body.phnnbr),
-				(user2.password = req.body.password);
+				(user2.saloonOwnerContact = req.body.phnnbr);
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
