@@ -9,10 +9,12 @@ const superadminrouter = require("./Superadmin");
 const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const schedule_router = require("./Schedule");
+const connectDB = require("./connectivity");
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
 //const cors = require("cors");
+connectDB();
 const app = express();
 app.use(express.json());
 /*if(!config.get('jwtpk')){
@@ -52,10 +54,10 @@ app.use(
 	service_appointment_router.ServiceAppointmentRouter
 );
 
-monogoes
-	.connect("mongodb://localhost/fypdatabase")
-	.then(() => console.log("connected successfuly"))
-	.catch(() => console.error("Couldnot connected to mongodb..", err));
+// monogoes
+// 	.connect("mongodb://localhost/fypdatabase")
+// 	.then(() => console.log("connected successfuly"))
+// 	.catch(() => console.error("Couldnot connected to mongodb..", err));
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("Listening succesfully on port ...", port));
 //UserSignup_router.Creatuser();
