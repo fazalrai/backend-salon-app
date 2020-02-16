@@ -108,7 +108,10 @@ Userrouter.post("/", async (req, res) => {
 			"login_jwt_privatekey"
 		);
 
-		return res.status(200).header('x-auth-token',token).send();
+		return res
+			.status(200)
+			.header("x-auth-token", token)
+			.send("token suucessfully sent");
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
