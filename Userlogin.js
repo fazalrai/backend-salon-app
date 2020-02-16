@@ -22,7 +22,10 @@ User_login_router.post("/", async (req, res) => {
 			{ login: true, id: user._id },
 			"login_jwt_privatekey"
 		);
-		return res.status(200).send(token);
+		return res
+			.status(200)
+			.header("x-auth-token", token)
+			.send("login successfully");
 	} catch (error) {
 		return res.status(400).send(error.message);
 	}
