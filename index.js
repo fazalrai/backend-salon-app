@@ -9,14 +9,11 @@ const superadminrouter = require("./Superadmin");
 const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const schedule_router = require("./Schedule");
-<<<<<<< HEAD
-const connectDB = require("./connectivity");
-=======
 const Reset_password_router = require("./ResetPassword");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
->>>>>>> fazal
+
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
@@ -63,12 +60,6 @@ app.use(
 	service_appointment_router.ServiceAppointmentRouter
 );
 
-<<<<<<< HEAD
-// monogoes
-// 	.connect("mongodb://localhost/fypdatabase")
-// 	.then(() => console.log("connected successfuly"))
-// 	.catch(() => console.error("Couldnot connected to mongodb..", err));
-=======
 app.use(
 	"/Digital_Saloon.com/api/Reset/password",
 	Reset_password_router.Reset_password_router
@@ -77,13 +68,11 @@ app.use(
 app.get("/", (req, res) => {
 	return res.status(200).send("hello");
 });
-connectDB();
 
 // monogoes
 // 	.connect("mongodb://localhost/fypdatabase")
 // 	.then(() => console.log("connected successfuly"))
 // 	.catch(() => console.error("Couldnot connected to mongodb.."));
->>>>>>> fazal
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("Listening succesfully on port ...", port));
 //UserSignup_router.Creatuser();

@@ -50,11 +50,7 @@ SuperadminRouter.put("/", async (req, res) => {
 			}
 			const user = await SuperAdminTable.findOne({
 				SuperAdminEmail: req.body.email,
-<<<<<<< HEAD
-				_id: { $ne: req.params.id }
-=======
 				_id: { $ne: decode.id }
->>>>>>> fazal
 			});
 			if (user) return res.status(400).send("Email already exist");
 

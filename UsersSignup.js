@@ -102,30 +102,13 @@ Userrouter.post("/", async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	newuser.password = await bcrypt.hash(newuser.password, salt);
 	try {
-<<<<<<< HEAD
-		await newuser
-			.save()
-			.then(result => {
-				const token = jwt.sign(
-					{ newuser_login: true, id: result._id },
-					"login_jwt_privatekey"
-				);
-				return res
-					.header("x-auth-token", token)
-					.status(200)
-					.send(result);
-			})
-=======
 		const result = await newuser.save();
 		const token = jwt.sign(
 			{ login: true, id: result._id },
 			"login_jwt_privatekey"
 		);
->>>>>>> fazal
 
-			.catch(error => {
-				return res.status(400).send(error.message);
-			});
+		return res.status(200).send(token);
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
