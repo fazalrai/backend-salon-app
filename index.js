@@ -63,12 +63,15 @@ app.use(
 	Reset_password_router.Reset_password_router
 );
 
+app.get("/", (req, res) => {
+	return res.status(200).send("hello");
+});
 connectDB();
 
-monogoes
-	.connect("mongodb://localhost/fypdatabase")
-	.then(() => console.log("connected successfuly"))
-	.catch(() => console.error("Couldnot connected to mongodb.."));
+// monogoes
+// 	.connect("mongodb://localhost/fypdatabase")
+// 	.then(() => console.log("connected successfuly"))
+// 	.catch(() => console.error("Couldnot connected to mongodb.."));
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("Listening succesfully on port ...", port));
 //UserSignup_router.Creatuser();
