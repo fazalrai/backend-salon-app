@@ -9,7 +9,6 @@ const superadminrouter = require("./Superadmin");
 const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const schedule_router = require("./Schedule");
-//const Reset_password_router = require("./ResetPassword");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
@@ -59,11 +58,6 @@ app.use(
 	"/Digital_Saloon.com/api/book/appointment",
 	service_appointment_router.ServiceAppointmentRouter
 );
-
-// app.use(
-// 	"/Digital_Saloon.com/api/Reset/password",
-// 	Reset_password_router.Reset_password_router
-// );
 
 app.get("/", (req, res) => {
 	return res.status(200).send("hello");
