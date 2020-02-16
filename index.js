@@ -18,8 +18,8 @@ const compression = require("compression");
 //const auth = require("./auth");
 //const cors = require("cors");
 const app = express();
-app.use(helmet);
-app.use(compression);
+app.use(helmet());
+app.use(compression());
 app.use(express.json());
 /*if(!config.get('jwtpk')){
     console.log("FATAL error...jwt primary key is not defined");
