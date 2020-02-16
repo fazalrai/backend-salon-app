@@ -60,10 +60,10 @@ app.use(
 	service_appointment_router.ServiceAppointmentRouter
 );
 
-app.use(
-	"/Digital_Saloon.com/api/Reset/password",
-	Reset_password_router.Reset_password_router
-);
+// app.use(
+// 	"/Digital_Saloon.com/api/Reset/password",
+// 	Reset_password_router.Reset_password_router
+// );
 
 app.get("/", (req, res) => {
 	return res.status(200).send("hello");
