@@ -12,13 +12,14 @@ const schedule_router = require("./Schedule");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
-
+const multer = require("multer");
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
 //const cors = require("cors");
 connectDB();
 const app = express();
+app.use(express.static("public"));
 app.use(helmet());
 app.use(compression());
 app.use(express.json());
