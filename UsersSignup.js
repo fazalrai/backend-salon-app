@@ -155,49 +155,42 @@ Userrouter.put("/change/password", async (req, res) => {
 
 Userrouter.post("/forgot/password", async (req, res) => {
 	const name = await UserTable.findOne({ UserEmail: req.body.email });
-	if (name) {
-		let transporter = nodemailer.createTransport({
-			service: "Gmail",
-			//port: 587,
-			secure: false,
+	if (!name) return res.status(400).send("invalid email");
 
-			auth: {
-				user: "fa16-bcs-347@cuilahore.edu.pk",
-				pass: "pmlnpmln1234"
-			}
-		});
+	let transporter = nodemailer.createTransport({
+		service: "Gmail",
+		//port: 587,
+		secure: false,
 
-		let mailOptions = {
-			from: "fa16-bcs-347@cuilahore.edu.pk",
-			to: req.body.email,
-			subject: "Verfication Code",
-			text: Math.floor(random(10000, 100000)).toString()
-		};
+		auth: {
+			user: "fa16-bcs-347@cuilahore.edu.pk",
+			pass: "pmlnpmln1234"
+		}
+	});
 
-		transporter.sendMail(mailOptions, function(err, info) {
-			if (err) {
-				return res.status(400).send(err);
-			} else {
-				console.log("sent successfully");
-				//return res
-				//	.status(200)
-				//	.send("enter the verfication code send to your number");
-			}
-		});
-	} else {
-		return res.status(400).send(err);
+	let mailOptions = {
+		from: "fa16-bcs-347@cuilahore.edu.pk",
+		to: req.body.email,
+		subject: "Verfication Code",
+		text: Math.floor(random(10000, 100000)).toString()
+	};
 
-		//return res.status(400).send("invalid email");
-	}
+	transporter.sendMail(mailOptions, function(err, info) {
+		if (err) {
+			return res.status(400).send(err);
+		}
+	});
+
 	const new_token = new ttl_table({
 		createdAt: new Date(),
-		Userid: user._id,
+		user_email: req.body.email,
 		token: parseInt(mailOptions.text)
 	});
 
 	const already_token = await ttl_table
-		.findOne({ Userid: user._id })
+		.findOne({ user_email: req.body.email })
 		.select({ token });
+
 	if (already_token) {
 		already_token.token = new_token.token;
 		try {
