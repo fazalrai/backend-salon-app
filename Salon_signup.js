@@ -2,9 +2,20 @@ const monogoes = require("mongoose");
 const express = require("express");
 const SalonRouter = express.Router();
 const jwt = require("jsonwebtoken");
-var name;
+const bcrypt = require("bcrypt");
 const SalonSchema = new monogoes.Schema({
-	SalomOwnerName: { type: String, required: true, minlength: 3, maxlength: 20 },
+	Salon_owner_firstName: {
+		type: String,
+		required: true,
+		minlength: 3,
+		maxlength: 20
+	},
+	Salon_owner_lastName: {
+		type: String,
+		required: true,
+		minlength: 3,
+		maxlength: 20
+	},
 	SalonOwnerEmail: { type: String, required: true, minlength: 7 },
 	password: { type: String, required: true, minlength: 8, maxlength: 25 },
 	SalonOwnerphoneNumber: {
@@ -37,14 +48,16 @@ SalonRouter.post("/", async (req, res) => {
 		salon = await SalonTable.findOne({ SalonOwnerCnic: req.body.cnic });
 		if (salon) return res.status(400).send("Cnic already exist");
 		const newSalon = new SalonTable({
-			SalomOwnerName: req.body.name,
+			Salon_owner_firstName: req.body.Salon_owner_firstName,
+			Salon_owner_lastName: req.body.Salon_owner_lastName,
 			SalonOwnerEmail: req.body.email,
 			password: req.body.password,
 			SalonOwnerphoneNumber: req.body.phoneNumber,
 			SalonOwnerCnic: req.body.cnic,
 			SalonName: req.body.salonname
 		});
-
+		const salt = await bcrypt.genSalt(10);
+		newSalon.password = await bcrypt.hash(newSalon.password, salt);
 		try {
 			await newSalon
 				.save()
@@ -62,14 +75,6 @@ SalonRouter.post("/", async (req, res) => {
 				.catch(error => {
 					return res.status(400).send(error.message);
 				});
-			//const token = jwt.sign(
-			//	{ newSalon_account: true, id: result._id },
-			//	"login_jwt_privatekey"
-			//);
-			return res
-				.status(200)
-				.header("x-auth-token", token)
-				.send(result);
 		} catch (error) {
 			return res.status(400).send(error.message);
 		}
@@ -101,7 +106,7 @@ SalonRouter.put("/", async (req, res) => {
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
-			(user2.SalomOwnerName = req.body.name),
+			(user2.Salon_owner_firstName = req.body.name),
 				(user2.SalonOwnerEmail = req.body.email),
 				(user2.SalonOwnerphoneNumber = req.body.phoneNumber),
 				(user2.SalonOwnerCnic = req.body.cnic),
