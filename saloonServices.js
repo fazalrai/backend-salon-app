@@ -1,13 +1,34 @@
 const monogoes = require("mongoose");
 const express = require("express");
+const multer = require("multer");
+const storage = multer.diskStorage({
+	destination: function(req, file, cb) {
+		cb(null, "./public");
+	},
+	filename: function(req, file, cb) {
+		cb(null, new Date().now + file.originalname);
+	}
+});
+const filefilter = (req, file, cb) => {
+	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+		cb(null, true);
+	} else {
+		cb(null, false);
+	}
+};
+const upload = multer(
+	{ dest: "./public" },
+	{ limits: { fileSize: 1024 * 1024 * 7 } }
+);
 const jwt = require("jsonwebtoken");
 const { SalonTable } = require("./Salon_signup");
 const saloonServicesRouter = express.Router();
 const saloonServicesSchema = new monogoes.Schema({
 	serviceName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	servicePrice: { type: Number, required: true, minlength: 1 },
-	serviceDescription: { type: String, required: true, minlength: 10 }
-	//	SericeImageAddress: { type: String },
+	serviceDescription: { type: String, required: true, minlength: 10 },
+	image: { type: String, required: true }
+
 	//	ServiceAvgRating: { type: Number }
 });
 const SalonServicesTable = monogoes.model(
@@ -15,38 +36,45 @@ const SalonServicesTable = monogoes.model(
 	saloonServicesSchema
 );
 // To get salon service of particular salon
-saloonServicesRouter.get("/", async (req, res) => {
-	const token = req.header("x-auth-token");
-	if (!token) return res.status(401).send("Access denied ,No token provided");
-	try {
-		const decode = jwt.verify(token, "login_jwt_privatekey");
+saloonServicesRouter.get(
+	"/",
 
-		if (decode) {
-			const allservices = await SalonServicesTable.find().sort("name");
-			res.status(200).send(allservices);
-		}
-	} catch (exc) {
-		res.status(400).send("Invalid token");
+	async (req, res) => {
+		const allservices = await SalonServicesTable.find();
+		res.status(200).send(allservices);
+		//	console.log("hello");
+
+		// const token = req.header("x-auth-token");
+		// if (!token) return res.status(401).send("Access denied ,No token provided");
+		// try {
+		// 	const decode = jwt.verify(token, "login_jwt_privatekey");
+
+		// 	if (decode) {
+		// 		const allservices = await SalonServicesTable.find().sort("name");
+		// 		res.status(200).send(allservices);
+		// 	}
+		// } catch (exc) {
+		// 	res.status(400).send("Invalid token");
+		// }
 	}
-});
+);
 
 saloonServicesRouter.get("/Filter_by_Price", async (req, res) => {
-	const token = req.header("x-auth-token");
-	if (!token) return res.status(401).send("Access denied ,No token provided");
-	try {
-		const decode = jwt.verify(token, "login_jwt_privatekey");
-
-		if (decode) {
-			const allservices = await SalonServicesTable.find().sort({
-				servicePrice: 1
-			});
-			res.status(200).send(allservices);
-		}
-	} catch (exc) {
-		res.status(400).send("Invalid token");
-	}
+	// const token = req.header("x-auth-token");
+	// if (!token) return res.status(401).send("Access denied ,No token provided");
+	// try {
+	// 	const decode = jwt.verify(token, "login_jwt_privatekey");
+	// 	if (decode) {
+	// 	// 		const allservices = await SalonServicesTable.find().sort({
+	// 				servicePrice: 1
+	// 			});
+	// 			res.status(200).send(allservices);
+	// 		}
+	// 	} catch (exc) {
+	// 		res.status(400).send("Invalid token");
+	// 	}
+	// });
 });
-
 saloonServicesRouter.get("/:id", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
@@ -121,40 +149,53 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 	//	(user2.phoneNumber = req.body.phnnbr);
 });
 
-saloonServicesRouter.post("/", async (req, res) => {
-	const token = req.header("x-auth-token");
-	if (!token) return res.status(401).send("Access denied ,No token provided");
+saloonServicesRouter.post("/", upload.single("image"), async (req, res) => {
 	try {
-		const decode = jwt.verify(token, "login_jwt_privatekey");
-		if (decode) {
-			try {
-				const newService = new SalonServicesTable({
-					serviceName: req.body.servicename,
-					servicePrice: req.body.price,
-					serviceDescription: req.body.description
-					//ServiceAvgRating: req.body.rating
-				});
+		console.log("hello");
+		//console.log(req.file);
+		//		const token = req.header("x-auth-token");
+		// if (!token) return res.status(401).send("Access denied ,No token provided");
+		// try {
+		// 	const decode = jwt.verify(token, "login_jwt_privatekey");
+		// 	if (decode) {
+		try {
+			const newService = new SalonServicesTable({
+				serviceName: req.body.servicename,
+				servicePrice: req.body.price,
+				serviceDescription: req.body.description,
+				image: req.file.path
+			});
 
-				try {
-					const result = await newService.save();
-					//	const Salon = await SalonTable.find({ _id: decode.id });
-					const addservice = await SalonTable.update(
-						{
-							_id: decode.id
-						},
-						{ $push: { ListOfSalonServices: result._id } }
-					);
-					return res.status(200).send(result);
-				} catch (ex) {
-					return res.status(400).send(ex.message);
-				}
+			try {
+				//	console.log(newService);
+				const result = await newService.save();
+				console.log(result);
+				return res.status(200).send(result);
+				//	const Salon = await SalonTable.find({ _id: decode.id });
+				// const addservice = await SalonTable.update(
+				// 	{
+				// 		_id: decode.id
+				// 	},
+				// 	{ $push: { ListOfSalonServices: result._id } }
+				// );
+				//	return res.status(200).send(result);
 			} catch (ex) {
 				return res.status(400).send(ex.message);
 			}
+		} catch (ex) {
+			return res.status(400).send(ex.message);
 		}
-	} catch (ex) {
-		return res.status(400).send("Invalid token");
+		//}
+		// } catch (ex) {
+		// 	return res.status(400).send("Invalid token");
+		// }
+	} catch (error) {
+		return res.status(400).send(error.message);
+		//console.log(error.message);
 	}
 });
+// saloonServicesRouter.post("/", async (req, res) => {
+// 	return res.send("hello world");
+// });
 module.exports.saloonServicesRouter = saloonServicesRouter;
 //module.exports.servce = servce;

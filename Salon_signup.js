@@ -17,7 +17,7 @@ const SalonSchema = new monogoes.Schema({
 		maxlength: 20
 	},
 	SalonOwnerEmail: { type: String, required: true, minlength: 7 },
-	password: { type: String, required: true, minlength: 8, maxlength: 25 },
+	password: { type: String, required: true, minlength: 8, maxlength: 70 },
 	SalonOwnerphoneNumber: {
 		type: Number,
 		required: true,

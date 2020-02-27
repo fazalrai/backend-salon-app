@@ -1,5 +1,6 @@
 const monogoes = require("mongoose");
 const express = require("express");
+const bodyparser = require("body-parser");
 const UserSignup_router = require("./UsersSignup");
 const Userlogin_router = require("./Userlogin");
 const SalonRouter = require("./Salon_signup");
@@ -12,7 +13,7 @@ const schedule_router = require("./Schedule");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
-const multer = require("multer");
+//const multer = require("multer");
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
@@ -20,14 +21,32 @@ const multer = require("multer");
 connectDB();
 const app = express();
 app.use(express.static("public"));
-app.use(helmet());
-app.use(compression());
+app.use(express.urlencoded({ extended: true }));
+//app.use(multer());
+//app.use(cors);
+//app.use(helmet());
+//app.use(compression());
 app.use(express.json());
 /*if(!config.get('jwtpk')){
     console.log("FATAL error...jwt primary key is not defined");
     process.exit(1);
 }*/
 //app.use(cors());
+
+app.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header(
+		"Access-Control-Allow-Headers",
+		"Origin,X-Requested-With,Content-Type,Accept,Authorization"
+	);
+	if (req.method == "OPTIONS") {
+		res.header("Access-Control-Allow-Methods", "PUT,POST,PATCH,DELETE");
+		return res.status(200).json({});
+	}
+
+	next();
+});
+
 if (!" login_jwt_privatekey") {
 	console.error("FATAL ERROR,jwt private key is not defined");
 	process.exit(1);
@@ -59,10 +78,6 @@ app.use(
 	"/Digital_Saloon.com/api/book/appointment",
 	service_appointment_router.ServiceAppointmentRouter
 );
-
-app.get("/", (req, res) => {
-	return res.status(200).send("hello");
-});
 
 // monogoes
 // 	.connect("mongodb://localhost/fypdatabase")
