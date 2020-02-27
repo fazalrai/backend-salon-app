@@ -20,7 +20,7 @@ const compression = require("compression");
 //const cors = require("cors");
 connectDB();
 const app = express();
-app.use(express.static("public"));
+app.use("/uploads", express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 //app.use(multer());
 //app.use(cors);

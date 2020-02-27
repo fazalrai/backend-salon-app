@@ -9,7 +9,8 @@ const connectDB = async () => {
 				useCreateIndex: true,
 				useFindAndModify: false,
 				useUnifiedTopology: true
-			}
+			},
+			{ reconnectTries: 30, reconnectInterval: 1000 }
 		);
 		console.log("MongoDB Connected...");
 	} catch (err) {
