@@ -27,8 +27,9 @@ const saloonServicesSchema = new monogoes.Schema({
 	serviceName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	servicePrice: { type: Number, required: true, minlength: 1 },
 	serviceDescription: { type: String, required: true, minlength: 10 },
-	image: { type: String, required: true }
-
+	image: { type: String, required: true },
+	service_category: { type: String, required: true },
+	Salon_id: { type: String, required: true }
 	//	ServiceAvgRating: { type: Number }
 });
 const SalonServicesTable = monogoes.model(
@@ -151,44 +152,48 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 
 saloonServicesRouter.post("/", upload.single("image"), async (req, res) => {
 	try {
-		console.log("hello");
-		//console.log(req.file);
-		//		const token = req.header("x-auth-token");
-		// if (!token) return res.status(401).send("Access denied ,No token provided");
-		// try {
-		// 	const decode = jwt.verify(token, "login_jwt_privatekey");
-		// 	if (decode) {
+		//console.log("hello");
+		//	console.log("eader is ", req.header("x-auth-token"));
+		//	console.log(req.headers);
+		//	console.log(req.headers("x-auth-token"));
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
 		try {
-			const newService = new SalonServicesTable({
-				serviceName: req.body.servicename,
-				servicePrice: req.body.price,
-				serviceDescription: req.body.description,
-				image: req.file.path
-			});
+			const decode = jwt.verify(token, "login_jwt_privatekey");
+			if (decode) {
+				try {
+					const newService = new SalonServicesTable({
+						serviceName: req.body.servicename,
+						servicePrice: req.body.price,
+						serviceDescription: req.body.description,
+						image: req.file.path,
+						service_category: req.body.service_category,
+						Salon_id: decode.id
+					});
 
-			try {
-				//	console.log(newService);
-				const result = await newService.save();
-				console.log(result);
-				return res.status(200).send(result);
-				//	const Salon = await SalonTable.find({ _id: decode.id });
-				// const addservice = await SalonTable.update(
-				// 	{
-				// 		_id: decode.id
-				// 	},
-				// 	{ $push: { ListOfSalonServices: result._id } }
-				// );
-				//	return res.status(200).send(result);
-			} catch (ex) {
-				return res.status(400).send(ex.message);
+					try {
+						//	console.log(newService);
+						const result = await newService.save();
+						console.log(result);
+						return res.status(200).send(result);
+						//	const Salon = await SalonTable.find({ _id: decode.id });
+						// const addservice = await SalonTable.update(
+						// 	{
+						// 		_id: decode.id
+						// 	},
+						// 	{ $push: { ListOfSalonServices: result._id } }
+						// );
+						//	return res.status(200).send(result);
+					} catch (ex) {
+						return res.status(400).send(ex.message);
+					}
+				} catch (ex) {
+					return res.status(400).send(ex.message);
+				}
 			}
 		} catch (ex) {
-			return res.status(400).send(ex.message);
+			return res.status(400).send("Invalid token");
 		}
-		//}
-		// } catch (ex) {
-		// 	return res.status(400).send("Invalid token");
-		// }
 	} catch (error) {
 		return res.status(400).send(error.message);
 		//console.log(error.message);

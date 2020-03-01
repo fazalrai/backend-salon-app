@@ -17,13 +17,19 @@ const compression = require("compression");
 //const config = require("config");
 //const userroute = require("./addusers");
 //const auth = require("./auth");
-//const cors = require("cors");
+const cors = require("cors");
 connectDB();
 const app = express();
-app.use("/uploads", express.static("public"));
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 //app.use(multer());
-//app.use(cors);
+// app.use(
+// 	cors({
+// 		//origin: "http://localhost:8080",
+// 		//	credentials: true,
+// 		exposedHeaders: ["x-auth-token"]
+// 	})
+// );
 //app.use(helmet());
 //app.use(compression());
 app.use(express.json());
@@ -32,7 +38,11 @@ app.use(express.json());
     process.exit(1);
 }*/
 //app.use(cors());
-
+app.use(
+	cors({
+		exposedHeaders: ["x-auth-token"]
+	})
+);
 app.use((req, res, next) => {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header(
@@ -41,7 +51,7 @@ app.use((req, res, next) => {
 	);
 	if (req.method == "OPTIONS") {
 		res.header("Access-Control-Allow-Methods", "PUT,POST,PATCH,DELETE");
-		return res.status(200).json({});
+		res.status(200).json({});
 	}
 
 	next();

@@ -36,6 +36,7 @@ const SalonSchema = new monogoes.Schema({
 const SalonTable = monogoes.model("SalonOwner", SalonSchema);
 
 SalonRouter.post("/", async (req, res) => {
+	console.log(req.body);
 	try {
 		let salon = await SalonTable.findOne({
 			SalonOwnerEmail: req.body.email

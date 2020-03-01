@@ -9,7 +9,7 @@ User_login_router.post("/", async (req, res) => {
 			UserEmail: req.body.email
 		});
 
-		if (!user) return res.send(400).send("Invalid email");
+		if (!user) return res.status(400).send("Invalid email");
 
 		const validpassword = await bcrypt.compare(
 			req.body.password,
