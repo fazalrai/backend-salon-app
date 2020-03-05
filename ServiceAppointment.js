@@ -47,6 +47,8 @@ const ServiceAppointmentTable = monogoes.model(
 
 ServiceAppointmentRouter.post("/", async (req, res) => {
 	console.log("The date is in the form ", req.body.booking_date);
+	console.log("The time is in the form ", req.body.stating_time);
+
 	// const Salon_id = await SalonServicesTable.findOne({
 	// 	_id: req.body.service_id
 	// }).select({ Salon_id: 1, _id: 0 });
