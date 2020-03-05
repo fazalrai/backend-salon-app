@@ -41,22 +41,24 @@ saloonServicesRouter.get(
 	"/",
 
 	async (req, res) => {
-		const allservices = await SalonServicesTable.find();
-		res.status(200).send(allservices);
+		// const allservices = await SalonServicesTable.find();
+		// res.status(200).send(allservices);
 		//	console.log("hello");
 
-		// const token = req.header("x-auth-token");
-		// if (!token) return res.status(401).send("Access denied ,No token provided");
-		// try {
-		// 	const decode = jwt.verify(token, "login_jwt_privatekey");
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
+		try {
+			const decode = jwt.verify(token, "login_jwt_privatekey");
 
-		// 	if (decode) {
-		// 		const allservices = await SalonServicesTable.find().sort("name");
-		// 		res.status(200).send(allservices);
-		// 	}
-		// } catch (exc) {
-		// 	res.status(400).send("Invalid token");
-		// }
+			if (decode) {
+				const allservices = await SalonServicesTable.find({
+					Salon_id: decode.id
+				}).sort("name");
+				res.status(200).send(allservices);
+			}
+		} catch (exc) {
+			res.status(400).send("Invalid token");
+		}
 	}
 );
 
@@ -107,7 +109,7 @@ saloonServicesRouter.delete("/:id", async (req, res) => {
 				let result = await SalonServicesTable.findById(req.params.id);
 				console.log(result);
 				const r1 = result.remove();
-				return res.status(200).send("User deleted successfuuly");
+				return res.status(200).send("Service deleted successfuuly");
 			} catch (exc) {
 				return res.status(400).send("invalid id");
 			}
@@ -136,7 +138,9 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 			}
 			(user2.serviceName = req.body.servicename),
 				(user2.servicePrice = req.body.price),
-				(user2.serviceDescription = req.body.description);
+				(user2.serviceDescription = req.body.description),
+				(user2.image = req.file.path),
+				(user2.service_category = req.body.service_category);
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
@@ -202,5 +206,6 @@ saloonServicesRouter.post("/", upload.single("image"), async (req, res) => {
 // saloonServicesRouter.post("/", async (req, res) => {
 // 	return res.send("hello world");
 // });
+module.exports.SalonServicesTable = SalonServicesTable;
 module.exports.saloonServicesRouter = saloonServicesRouter;
 //module.exports.servce = servce;
