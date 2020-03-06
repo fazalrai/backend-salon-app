@@ -3,7 +3,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const { SalonServicesTable } = require("./saloonServices");
 const ServiceAppointmentRouter = express.Router();
-
+//  "preset": "jest-expo"
 const ServiceAppointmentSchema = new monogoes.Schema({
 	customer_id: {
 		type: String
@@ -53,7 +53,7 @@ ServiceAppointmentRouter.post("/", async (req, res) => {
 	// 	_id: req.body.service_id
 	// }).select({ Salon_id: 1, _id: 0 });
 	//console.log("salon id ", Salon_id);
-	return res.send(req.body.booking_date);
+	return res.status(200).send(req.body);
 });
 
 /*ServiceAppointmentRouter.post("/", async (req, res) => {

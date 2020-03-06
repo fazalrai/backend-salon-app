@@ -29,7 +29,8 @@ const saloonServicesSchema = new monogoes.Schema({
 	serviceDescription: { type: String, required: true, minlength: 10 },
 	image: { type: String, required: true },
 	service_category: { type: String, required: true },
-	Salon_id: { type: String, required: true }
+	Salon_id: { type: String, required: true },
+	service_time: { type: Number, required: true }
 	//	ServiceAvgRating: { type: Number }
 });
 const SalonServicesTable = monogoes.model(
@@ -172,7 +173,8 @@ saloonServicesRouter.post("/", upload.single("image"), async (req, res) => {
 						serviceDescription: req.body.description,
 						image: req.file.path,
 						service_category: req.body.service_category,
-						Salon_id: decode.id
+						Salon_id: decode.id,
+						service_time: req.body.service_time
 					});
 
 					try {

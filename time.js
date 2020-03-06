@@ -11,6 +11,8 @@ var date2 = "2020-04-06";
 const myMoment = moment(date1, "YYYY-MM-DD").format("LL");
 const myMoment2 = moment(date2, "YYYY-MM-DD").format("LL");
 */
+
+/*
 var date1 = "2010-10-20";
 var date2 = "2010-10-20";
 var time1 = moment(date1).format("YYYY-MM-DD");
@@ -22,6 +24,12 @@ if (time2 > time1) {
 } else {
 	console.log("Both date are same");
 }
+
+
+*/
+
+//var time = moment.utc(start, "HH:mm"); //this is corect workin
+
 //var result1 = moment("2020-03-06").format("DD/MMM/YYYY");
 //console.log("result is ", myMoment2);
 
@@ -34,18 +42,31 @@ if (time2 > time1) {
 // }
 // time operations follow time-math logic
 //var s = time.format("HH:mm");
-//var time = moment.utc("09:25 AM", "HH:mm");//this is corect workin
 var format = "HH:mm A";
-
+var current_time = "09:25 AM";
+var start_time = "08:34 AM";
+var end_time = "10:34 AM";
+current_time = moment(current_time, format);
+start_time = moment(start_time, format);
+end_time = moment(end_time, format);
 // var time = moment() gives you current time. no format required.
-var time = moment("09:34 AM", format),
-	beforeTime = moment("08:34 AM", format),
-	afterTime = moment("10:34 AM", format);
+// var time = moment("09:25 AM", format),
+// 	beforeTime = moment("08:34 AM", format),
+// 	afterTime = moment("10:34 AM", format);
 
-if (time.isBetween(beforeTime, afterTime)) {
-	console.log("is between", time);
+if (current_time.isBetween(start_time, end_time)) {
+	console.log("is between", current_time);
 } else {
 	console.log("is not between");
+}
+
+var date1 = "2010-10-20";
+var date2 = "2010-10-20";
+
+if (moment(date1).isSame(date2)) {
+	console.log("dates are equla");
+} else {
+	console.log("dates are not equla");
 }
 //time = time.format("HH:mm A");
 //var time2 = moment.format("10:50 AM", "HH:mm A");
