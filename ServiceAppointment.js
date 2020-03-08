@@ -1,5 +1,10 @@
 const monogoes = require("mongoose");
 const express = require("express");
+//var moment = require("moment");
+const Moment = require("moment");
+const MomentRange = require("moment-range");
+
+const moment = MomentRange.extendMoment(Moment);
 const jwt = require("jsonwebtoken");
 const { SalonServicesTable } = require("./saloonServices");
 const ServiceAppointmentRouter = express.Router();
@@ -45,16 +50,128 @@ const ServiceAppointmentTable = monogoes.model(
 	ServiceAppointmentSchema
 );
 
-ServiceAppointmentRouter.post("/", async (req, res) => {
-	console.log("The date is in the form ", req.body.booking_date);
-	console.log("The time is in the form ", req.body.stating_time);
+ServiceAppointmentRouter.post("/", async (req, res, next) => {
+	const appointment_date = await ServiceAppointmentTable.find({
+		booking_date: req.body.booking_date
+	}).select({ stating_time: 1, ending_time: 1, _id: 0 });
+	if (appointment_date.length == 0) {
+		let format = "hh:mm A";
+		let start_time = moment(req.body.stating_time, format);
+		let start_time2 = moment(req.body.stating_time, format);
+		let end_time = start_time2.add(50, "minutes");
+		const appointment = new ServiceAppointmentTable({
+			// customer_id: decode.id,
+			// service_id: req.body.serviceid,
+			// Salon_id: Salon_id,
+			booking_date: req.body.booking_date,
+			stating_time: start_time,
+			ending_time: end_time
+		});
 
-	// const Salon_id = await SalonServicesTable.findOne({
-	// 	_id: req.body.service_id
-	// }).select({ Salon_id: 1, _id: 0 });
-	//console.log("salon id ", Salon_id);
-	return res.status(200).send(req.body);
+		try {
+			let start_time = moment(req.body.stating_time, format);
+			let start_time2 = moment(req.body.stating_time, format);
+			let end_time = start_time2.add(50, "minutes");
+			const result = await appointment.save();
+			return res.status(200).send(result);
+		} catch (error) {
+			return res.status(400).send(error.message);
+		}
+	} else {
+		try {
+			var flag = false;
+			let format = "hh:mm A";
+			//let format = "YYYY-MM-DD";
+			const request_boking_time = moment(req.body.stating_time, format);
+			const request_boking_time1 = moment(req.body.stating_time, format);
+			const req_end_time = request_boking_time1.add(50, "minutes");
+			const req_time_range = moment.range(request_boking_time, req_end_time);
+			console.log("req time range ", req_time_range);
+			appointment_date.map(item => {
+				let start_time = moment(item.stating_time);
+				let end_time = moment(item.ending_time);
+				let range = moment.range(start_time, end_time);
+				if (range.contains(req_time_range)) {
+					//	return res.status(200).send("it does contains");ri
+					flag = true;
+				}
+			});
+			if (flag === true) {
+				return res.status(200).send("it does contains");
+			} else {
+				let format = "hh:mm A";
+				let start_time = moment(req.body.stating_time, format);
+				let start_time2 = moment(req.body.stating_time, format);
+				let end_time = start_time2.add(50, "minutes");
+				const appointment = new ServiceAppointmentTable({
+					// customer_id: decode.id,
+					// service_id: req.body.serviceid,
+					// Salon_id: Salon_id,
+					booking_date: req.body.booking_date,
+					stating_time: start_time,
+					ending_time: end_time
+				});
+				try {
+					const result = await appointment.save();
+					return res.status(200).send(result);
+				} catch (error) {
+					return res.status(400).send(error.message);
+				}
+
+				//return res.status(200).send("it does not contain");
+			}
+		} catch (exc) {
+			return res.status(400).send("bad request error");
+		}
+	}
 });
+
+// let format = "hh:mm A";
+// let start_time1 = moment(req.body.stating_time, format);
+// let start_time3 = moment(req.body.stating_time, format);
+// let end_time1 = start_time3.add(5, "minutes");
+// let start_time = moment(req.body.stating_time, format);
+// let start_time2 = moment(req.body.stating_time, format);
+// let end_time = start_time2.add(50, "minutes");
+// let range = moment.range(start_time, end_time);
+// let range1 = moment.range(start_time1, end_time1);
+// if (range.contains(range1)) {
+// 	return res.status(200).send(range1);
+// } else {
+// 	return res.status(200).send("it does'nt contains");
+// }
+
+//	console.log("The date is in the form ", req.body.booking_date);
+//	console.log("The time is in the form ", req.body.stating_time);
+/*let format = "HH:mm A";
+	let start_time = moment(req.body.stating_time, format);
+	let start_time2 = moment(req.body.stating_time, format);
+	let end_time = start_time2.add(50, "minutes");
+	const appointment = new ServiceAppointmentTable({
+		// customer_id: decode.id,
+		// service_id: req.body.serviceid,
+		// Salon_id: Salon_id,
+		booking_date: req.body.booking_date,
+		stating_time: start_time,
+		ending_time: end_time
+	});
+
+	try {
+		const result = await appointment.save();
+		return res.status(200).send(result);
+	} catch (error) {
+		return res.status(400).send(error.message);
+	}*/
+// console.log("The date is in the form ", req.body.booking_date);
+// console.log("The starting time is in the form ", start_time);
+// console.log("The endingtime is in the form ", end_time);
+
+///var end_time = moment(end_time, format);
+// const Salon_id = await SalonServicesTable.findOne({
+// 	_id: req.body.service_id
+// }).select({ Salon_id: 1, _id: 0 });
+//console.log("salon id ", Salon_id);
+//return res.status(200).send(req.body);
 
 /*ServiceAppointmentRouter.post("/", async (req, res) => {
 	const token = req.header("x-auth-token");

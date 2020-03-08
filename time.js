@@ -42,7 +42,7 @@ if (time2 > time1) {
 // }
 // time operations follow time-math logic
 //var s = time.format("HH:mm");
-var format = "HH:mm A";
+var format = "hh:mm A";
 var current_time = "09:25 AM";
 var start_time = "08:34 AM";
 var end_time = "10:34 AM";
@@ -50,14 +50,13 @@ current_time = moment(current_time, format);
 start_time = moment(start_time, format);
 end_time = moment(end_time, format);
 // var time = moment() gives you current time. no format required.
-// var time = moment("09:25 AM", format),
 // 	beforeTime = moment("08:34 AM", format),
 // 	afterTime = moment("10:34 AM", format);
 
 if (current_time.isBetween(start_time, end_time)) {
-	console.log("is between", current_time);
+	console.log("is between", current_time.format("hh:mm A"));
 } else {
-	console.log("is not between");
+	console.log("is not between", current_time.format("hh:mm A"));
 }
 
 var date1 = "2010-10-20";

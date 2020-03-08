@@ -10,6 +10,8 @@ const superadminrouter = require("./Superadmin");
 const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const schedule_router = require("./Schedule");
+const { Salon_Schedule_router } = require("./SalonSchedule");
+
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
@@ -83,7 +85,11 @@ app.use(
 	"/Digital_Saloon.com/api/login/salonOwner",
 	saloonOwner_login_Router.SalonOwner_login_router
 );
-app.use("/Digital_Saloon.com/api/schedule", schedule_router.ScheduleRouter);
+// app.use(
+// 	"/Digital_Saloon.com/api/Saloon_owner/schedule",
+// 	schedule_router.ScheduleRouter
+// );
+app.use("/Digital_Saloon.com/api/Saloon_owner/schedule", Salon_Schedule_router);
 app.use(
 	"/Digital_Saloon.com/api/book/appointment",
 	service_appointment_router.ServiceAppointmentRouter
