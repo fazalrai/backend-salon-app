@@ -31,7 +31,15 @@ const SalonSchema = new monogoes.Schema({
 		maxlength: 20
 	},
 	SalonName: { type: String, required: true, minlength: 3 },
-	ListOfSalonServices: [String]
+	Salon_opening_hours: {
+		type: String,
+		required: true
+	},
+	Salon_closing_hours: {
+		type: String,
+		required: true
+	}
+	//ListOfSalonServices: [String]
 });
 const SalonTable = monogoes.model("SalonOwner", SalonSchema);
 
@@ -55,7 +63,9 @@ SalonRouter.post("/", async (req, res) => {
 			password: req.body.password,
 			SalonOwnerphoneNumber: req.body.phoneNumber,
 			SalonOwnerCnic: req.body.cnic,
-			SalonName: req.body.salonname
+			SalonName: req.body.salonname,
+			Salon_opening_hours: req.body.Salon_opening_hours,
+			Salon_closing_hours: req.body.Salon_closing_hours
 		});
 		const salt = await bcrypt.genSalt(10);
 		newSalon.password = await bcrypt.hash(newSalon.password, salt);
