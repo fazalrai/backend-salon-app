@@ -219,5 +219,14 @@ function random(low, high) {
 	return Math.random() * (high - low) + low;
 }
 
+SalonRouter.get("/", async (req, res) => {
+	const salon = await SalonTable.find().select({
+		SalonName: 1,
+		Salon_opening_hours: 1,
+		Salon_closing_hours: 1,
+		_id: 0
+	});
+	return res.status(200).send(salon);
+});
 module.exports.SalonRouter = SalonRouter;
 module.exports.SalonTable = SalonTable;

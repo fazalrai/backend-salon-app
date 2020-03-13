@@ -56,7 +56,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		console.log("hello", req.params.id);
 		const Salon_id = await SalonServicesTable.findOne({
 			_id: req.params.id
-		}).select({ Salon_id: 1, _id: 0 });
+		}).select({ Salon_id: 1, service_time: 1, _id: 0 });
 
 		//console.log("salon id is", Salon_id.Salon_id);
 		//	const a = await SalonTable.find();
@@ -71,7 +71,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		//	const hours = moment("00", "hh").format("LT");
 		//const hours = moment("12:00 AM", ["h:mm A"]).format("HH:mm");// to convert 12 hours into 24
 		// console.log("hours in format", hours);
-		//	console.log("salon opening and closing", Salon_timings);
+		console.log("salon opening and closing", Salon_timings);
 		// const opening = moment(Salon_timings.Salon_opening_hours, "hh:mm").format(
 		// 	"LT"
 		// );
@@ -128,7 +128,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		let starttime2 = moment(req.body.stating_time, format);
 		//let starttime2 = moment(req.body.stating_time).format("");
 
-		let endtime = starttime2.add(100, "minutes");
+		let endtime = starttime2.add(Salon_id.service_time, "minutes");
 		let final_form_of_end_time = moment(endtime).format("HH:mm");
 
 		//endtime = moment(endtime).format("HH:mm A");
@@ -154,13 +154,20 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 
 		console.log("appointment data is", appointment_date);
 		if (appointment_date.length == 0) {
+			const request_boking_time = moment(req.body.stating_time, format);
+			const request_boking_time1 = moment(req.body.stating_time, format);
+			const req_end_time = request_boking_time1.add(
+				Salon_id.service_time,
+				"minutes"
+			);
+
 			const appointment = new ServiceAppointmentTable({
-				// customer_id: decode.id,
-				// service_id: req.body.serviceid,
-				// Salon_id: Salon_id,
+				customer_id: decode.id,
+				service_id: req.body.serviceid,
+				Salon_id: Salon_id.Salon_id,
 				booking_date: req.body.booking_date,
-				stating_time: starttime,
-				ending_time: final_form_of_end_time
+				stating_time: request_boking_time,
+				ending_time: req_end_time
 			});
 
 			try {
@@ -172,29 +179,41 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		} else {
 			try {
 				var flag = false;
-				let format = "hh:mm A";
+				//	let format = "hh:mm A";
 				const request_boking_time = moment(req.body.stating_time, format);
 				const request_boking_time1 = moment(req.body.stating_time, format);
-				const req_end_time = request_boking_time1.add(50, "minutes");
+				const req_end_time = request_boking_time1.add(
+					Salon_id.service_time,
+					"minutes"
+				);
 				const req_time_range = moment.range(request_boking_time, req_end_time);
 				console.log("req time range ", req_time_range);
 				appointment_date.map(item => {
 					let start_time = moment(item.stating_time);
 					let end_time = moment(item.ending_time);
 					let range = moment.range(start_time, end_time);
+					console.log("already booked service range", range);
 					if (range.contains(req_time_range)) {
+						//	return res.status(200).send("it does contains");ri
+						flag = true;
+					}
+					if (range.contains(request_boking_time)) {
+						//	return res.status(200).send("it does contains");ri
+						flag = true;
+					}
+					if (range.contains(req_end_time)) {
 						//	return res.status(200).send("it does contains");ri
 						flag = true;
 					}
 				});
 
 				if (flag === true) {
-					return res.status(200).send("it does contains");
+					return res.status(400).send("Time out exception");
 				} else {
 					let format = "hh:mm A";
 					let start_time = moment(req.body.stating_time, format);
 					let start_time2 = moment(req.body.stating_time, format);
-					let end_time = start_time2.add(50, "minutes");
+					let end_time = start_time2.add(Salon_id.service_time, "minutes");
 					const appointment = new ServiceAppointmentTable({
 						// customer_id: decode.id,
 						// service_id: req.body.serviceid,
