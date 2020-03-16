@@ -49,7 +49,7 @@ SuperadminRouter.get("/", async (req, res) => {
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
-			const result = SalonTable.find({ Account_verfied: false });
+			const result = await SalonTable.find({ Account_verfied: false });
 			return res.status(200).send(result);
 		}
 	} catch (exc) {
