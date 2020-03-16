@@ -63,6 +63,8 @@ SuperadminRouter.get("/:id", async (req, res) => {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			const salon = await SalonTable.findOne({ _id: req.params.id });
+			const remainig_salon = await SalonTable.find({ Account_verfied: false });
+
 			salon.Account_verfied = true;
 
 			const result = await salon.save();
@@ -92,7 +94,7 @@ SuperadminRouter.get("/:id", async (req, res) => {
 				}
 			});
 
-			return res.status(200).send("Account verfied sucessfully");
+			return res.status(200).send(remainig_salon);
 		}
 	} catch (exc) {
 		return res.status(400).send("bad request error");
