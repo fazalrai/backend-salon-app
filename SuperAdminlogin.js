@@ -1,14 +1,17 @@
 const express = require("express");
 const { SuperAdminTable } = require("./Superadmin");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
 const SuperAdmin_login_router = express.Router();
 SuperAdmin_login_router.post("/", async (req, res) => {
 	try {
 		const user = await SuperAdminTable.findOne({
-			SuperAdminEmail: req.body.email,
-			password: req.body.password
+			SuperAdminEmail: req.body.email
 		});
+		console.log("user is", user);
 		if (!user) return res.status(400).send("Invalid  username or password");
+
 		const validpassword = await bcrypt.compare(
 			req.body.password,
 			user.password

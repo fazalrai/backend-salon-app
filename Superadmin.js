@@ -1,6 +1,8 @@
 const monogoes = require("mongoose");
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
 const { SalonTable } = require("./Salon_signup");
 const SuperadminRouter = express.Router();
 const SuperAdminSchema = new monogoes.Schema({
@@ -23,6 +25,9 @@ SuperadminRouter.post("/", async (req, res) => {
 		password: req.body.password,
 		phonenumber: req.body.phonenumber
 	});
+	const salt = await bcrypt.genSalt(10);
+	newsuperadmin.password = await bcrypt.hash(newsuperadmin.password, salt);
+
 	try {
 		const result = await newsuperadmin.save();
 		const token = jwt.sign(
