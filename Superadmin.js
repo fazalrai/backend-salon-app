@@ -2,6 +2,7 @@ const monogoes = require("mongoose");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 
 const { SalonTable } = require("./Salon_signup");
 const SuperadminRouter = express.Router();
@@ -63,11 +64,12 @@ SuperadminRouter.get("/:id", async (req, res) => {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			const salon = await SalonTable.findOne({ _id: req.params.id });
-			const remainig_salon = await SalonTable.find({ Account_verfied: false });
+			console.log(salon);
 
 			salon.Account_verfied = true;
 
 			const result = await salon.save();
+			const remainig_salon = await SalonTable.find({ Account_verfied: false });
 
 			let transporter = nodemailer.createTransport({
 				service: "Gmail",
@@ -83,7 +85,7 @@ SuperadminRouter.get("/:id", async (req, res) => {
 			let mailOptions = {
 				from: "fa16-bcs-347@cuilahore.edu.pk",
 				to: salon.SalonOwnerEmail,
-				subject: "Verfication Code",
+				subject: "Account verfication",
 				text:
 					"Your account has been vaerified successfully.Click the given below link to proceed login"
 			};
@@ -97,7 +99,7 @@ SuperadminRouter.get("/:id", async (req, res) => {
 			return res.status(200).send(remainig_salon);
 		}
 	} catch (exc) {
-		return res.status(400).send("bad request error");
+		return res.status(400).send(exc.message);
 	}
 });
 
