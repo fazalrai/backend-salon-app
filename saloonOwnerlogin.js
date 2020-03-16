@@ -19,7 +19,7 @@ SalonOwner_login_router.post("/", async (req, res) => {
 		);
 
 		if (!validpassword) return res.status(400).send("invalid password");
-		if (Account_verfied) {
+		if (user.Account_verfied) {
 			const token = await jwt.sign(
 				{ Salon_Owner_login: true, id: user._id },
 				"login_jwt_privatekey"

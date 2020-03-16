@@ -1,5 +1,4 @@
 const monogoes = require("mongoose");
-const SalonTable = require("./Salon_signup");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { SalonTable } = require("./Salon_signup");
@@ -60,7 +59,34 @@ SuperadminRouter.get("/:id", async (req, res) => {
 		if (decode) {
 			const salon = await SalonTable.findOne({ _id: req.params.id });
 			salon.Account_verfied = true;
+
 			const result = await salon.save();
+
+			let transporter = nodemailer.createTransport({
+				service: "Gmail",
+				//port: 587,
+				secure: false,
+
+				auth: {
+					user: "fa16-bcs-347@cuilahore.edu.pk",
+					pass: "pmlnpmln1234"
+				}
+			});
+
+			let mailOptions = {
+				from: "fa16-bcs-347@cuilahore.edu.pk",
+				to: salon.SalonOwnerEmail,
+				subject: "Verfication Code",
+				text:
+					"Your account has been vaerified successfully.Click the given below link to proceed login"
+			};
+
+			transporter.sendMail(mailOptions, function(err, info) {
+				if (err) {
+					return res.status(400).send(err);
+				}
+			});
+
 			return res.status(200).send("Account verfied sucessfully");
 		}
 	} catch (exc) {
