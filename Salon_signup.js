@@ -38,6 +38,10 @@ const SalonSchema = new monogoes.Schema({
 	Salon_closing_hours: {
 		type: String,
 		required: true
+	},
+	Account_verfied: {
+		type: Boolean,
+		required: true
 	}
 	//ListOfSalonServices: [String]
 });
@@ -65,7 +69,8 @@ SalonRouter.post("/", async (req, res) => {
 			SalonOwnerCnic: req.body.cnic,
 			SalonName: req.body.salonname,
 			Salon_opening_hours: req.body.Salon_opening_hours,
-			Salon_closing_hours: req.body.Salon_closing_hours
+			Salon_closing_hours: req.body.Salon_closing_hours,
+			Account_verfied: false
 		});
 		const salt = await bcrypt.genSalt(10);
 		newSalon.password = await bcrypt.hash(newSalon.password, salt);
@@ -77,10 +82,12 @@ SalonRouter.post("/", async (req, res) => {
 						{ newSalon_account: true, id: result._id },
 						"login_jwt_privatekey"
 					);
-					return res
-						.header("x-auth-token", token)
-						.status(200)
-						.send(result);
+					return (
+						res
+							//	.header("x-auth-token", token)
+							.status(200)
+							.send("Request submitted sucessfully wait for verification")
+					);
 				})
 
 				.catch(error => {

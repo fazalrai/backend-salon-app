@@ -19,14 +19,18 @@ SalonOwner_login_router.post("/", async (req, res) => {
 		);
 
 		if (!validpassword) return res.status(400).send("invalid password");
-		const token = await jwt.sign(
-			{ Salon_Owner_login: true, id: user._id },
-			"login_jwt_privatekey"
-		);
-		return res
-			.status(200)
-			.header("x-auth-token", token)
-			.send("login successfully");
+		if (Account_verfied) {
+			const token = await jwt.sign(
+				{ Salon_Owner_login: true, id: user._id },
+				"login_jwt_privatekey"
+			);
+			return res
+				.status(200)
+				.header("x-auth-token", token)
+				.send("login successfully");
+		} else {
+			return res.status(403).send("Forbidden request");
+		}
 	} catch (error) {
 		res.status(400).send(error.message);
 	}
