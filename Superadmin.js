@@ -66,7 +66,7 @@ SuperadminRouter.delete("/:id", async (req, res) => {
 		if (decode) {
 			let result = await SalonTable.findById(req.params.id);
 			const r1 = result.remove();
-
+			const remainig_salon = await SalonTable.find({ Account_verfied: false });
 			let transporter = nodemailer.createTransport({
 				service: "Gmail",
 				//port: 587,
