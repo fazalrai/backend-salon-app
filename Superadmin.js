@@ -57,6 +57,47 @@ SuperadminRouter.get("/", async (req, res) => {
 		return res.status(400).send("bad request error");
 	}
 });
+
+SuperadminRouter.delete("/:id", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			let result = await SalonTable.findById(req.params.id);
+			const r1 = result.remove();
+
+			let transporter = nodemailer.createTransport({
+				service: "Gmail",
+				//port: 587,
+				secure: false,
+
+				auth: {
+					user: "fa16-bcs-347@cuilahore.edu.pk",
+					pass: "pmlnpmln1234"
+				}
+			});
+
+			let mailOptions = {
+				from: "fa16-bcs-347@cuilahore.edu.pk",
+				to: result.SalonOwnerEmail,
+				subject: "Account verfication",
+				text: "Your account can not been verified due to some reasons"
+			};
+
+			transporter.sendMail(mailOptions, function(err, info) {
+				if (err) {
+					return res.status(400).send(err);
+				}
+			});
+
+			return res.status(200).send(remainig_salon);
+		}
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
+});
+
 SuperadminRouter.get("/:id", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
