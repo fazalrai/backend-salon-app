@@ -227,13 +227,22 @@ function random(low, high) {
 }
 
 SalonRouter.get("/", async (req, res) => {
-	const salon = await SalonTable.find().select({
-		SalonName: 1,
-		Salon_opening_hours: 1,
-		Salon_closing_hours: 1,
-		_id: 1
-	});
-	return res.status(200).send(salon);
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			const salon = await SalonTable.find().select({
+				SalonName: 1,
+				Salon_opening_hours: 1,
+				Salon_closing_hours: 1,
+				_id: 1
+			});
+			return res.status(200).send(salon);
+		}
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
 });
 module.exports.SalonRouter = SalonRouter;
 module.exports.SalonTable = SalonTable;
