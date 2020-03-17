@@ -53,6 +53,11 @@ const ServiceAppointmentTable = monogoes.model(
 
 ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 	try {
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
+
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+
 		console.log("hello", req.params.id);
 		const Salon_id = await SalonServicesTable.findOne({
 			_id: req.params.id
@@ -68,77 +73,15 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 			_id: 0
 		});
 
-		//	const hours = moment("00", "hh").format("LT");
-		//const hours = moment("12:00 AM", ["h:mm A"]).format("HH:mm");// to convert 12 hours into 24
-		// console.log("hours in format", hours);
 		console.log("salon opening and closing", Salon_timings);
-		// const opening = moment(Salon_timings.Salon_opening_hours, "hh:mm").format(
-		// 	"LT"
-		// );
-		// const closing = moment(Salon_timings.Salon_closing_hours, "hh:mm").format(
-		// 	"LT"
-		// );
-		// let format = "hh:mm A";
-		// let start_time = moment(req.body.stating_time, format);
-		//const start_time = moment(req.body.stating_time, "hh:mm").format("LT");
-		// console.log("start time is ", start_time);
 
-		// let starttime2 = moment(req.body.stating_time, format);
-		// let endtime = starttime2.add(100, "minutes");
-		// let onlytime = moment(endtime, "hh:mm").format("LT");
-		// //	let onlytime1 = moment(onlytime, "hh:mm").format("HH:mm");
-
-		//	let starttime = moment(req.body.stating_time, ["h:mm A"]).format("HH:mm");
-
-		// console.log("hours are ", opening, closing);
-		// let salon_range = moment.range(opening, closing);
-		// let appointment_range = moment.range(start_time, onlytime);
-		// console.log("salon range", salon_range);
-		// console.log("appointment range", appointment_range);
-
-		// if (salon_range.contains(appointment_range)) {
-		// 	console.log("it contains");
-		// } else {
-		// 	console.log("it does not contain");
-		// }
-		// return res.status(200).send("its ok");
-
-		// if (start_time.isBetween(opening, closing)) {
-		// 	console.log("is between");
-		// } else {
-		// 	console.log("is not between");
-		// }
-
-		//to convert 24 hours into 12 hours AM
-
-		// let request_boking_time = moment(req.body.stating_time).format("HH:mm A");
-
-		// if (req.body.stating_time < opening) {
-		// 	console.log("yes it is less");
-		// }
-		//console.log("after conversion", opening, closing, request_boking_time);
-
-		// const twelevehoursformt = moment(Salon_timings.Salon_closing_hours).format(
-		// 	"h:mm A "
-		// );
-		//console.log("hell", twelevehoursformt);
 		const format = "hh:mm A";
 
 		let starttime = moment(req.body.stating_time, ["h:mm A"]).format("HH:mm");
 		let starttime2 = moment(req.body.stating_time, format);
-		//let starttime2 = moment(req.body.stating_time).format("");
 
 		let endtime = starttime2.add(Salon_id.service_time, "minutes");
 		let final_form_of_end_time = moment(endtime).format("HH:mm");
-
-		//endtime = moment(endtime).format("HH:mm A");
-		//console.log("start time is ", starttime);
-		//console.log("end time is ", final_form_of_end_time);
-		// console.log(
-		// 	"Salon timings ",
-		// 	Salon_timings.Salon_opening_hours,
-		// 	Salon_timings.Salon_closing_hours
-		// );
 
 		if (starttime < Salon_timings.Salon_opening_hours) {
 			return res.status(400).send("this is due to opening hours");
@@ -179,7 +122,6 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		} else {
 			try {
 				var flag = false;
-				//	let format = "hh:mm A";
 				const request_boking_time = moment(req.body.stating_time, format);
 				const request_boking_time1 = moment(req.body.stating_time, format);
 				const req_end_time = request_boking_time1.add(
@@ -194,15 +136,12 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 					let range = moment.range(start_time, end_time);
 					console.log("already booked service range", range);
 					if (range.contains(req_time_range)) {
-						//	return res.status(200).send("it does contains");ri
 						flag = true;
 					}
 					if (range.contains(request_boking_time)) {
-						//	return res.status(200).send("it does contains");ri
 						flag = true;
 					}
 					if (range.contains(req_end_time)) {
-						//	return res.status(200).send("it does contains");ri
 						flag = true;
 					}
 				});
@@ -215,9 +154,9 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 					let start_time2 = moment(req.body.stating_time, format);
 					let end_time = start_time2.add(Salon_id.service_time, "minutes");
 					const appointment = new ServiceAppointmentTable({
-						// customer_id: decode.id,
-						// service_id: req.body.serviceid,
-						// Salon_id: Salon_id,
+						customer_id: decode.id,
+						service_id: req.body.serviceid,
+						Salon_id: Salon_id,
 						booking_date: req.body.booking_date,
 						stating_time: start_time,
 						ending_time: end_time
