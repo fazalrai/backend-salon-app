@@ -232,7 +232,7 @@ SalonRouter.get("/", async (req, res) => {
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
-			const salon = await SalonTable.find().select({
+			const salon = await SalonTable.find({ Account_verfied: true }).select({
 				SalonName: 1,
 				Salon_opening_hours: 1,
 				Salon_closing_hours: 1,
