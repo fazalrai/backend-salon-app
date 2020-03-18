@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { SalonTable } = require("./Salon_signup");
 const ScheduleRouter = express.Router();
 const { ServiceAppointmentTable } = require("./ServiceAppointment");
+const moment = require("moment");
 
 ScheduleRouter.get("/customers/history", async (req, res) => {
 	const token = req.header("x-auth-token");
@@ -108,7 +109,15 @@ ScheduleRouter.get("/", async (req, res) => {
 
 ScheduleRouter.post("/", async (req, res) => {
 	console.log("hello");
+	const only_date = moment(req.body.current_date).format("DD-MMM-YYYY");
+	const appointment = await ServiceAppointmentTable.find({
+		booking_date: only_date
+	});
+
+	console.log("only date is", appointment);
+
 	return res.status(200).send(req.body.current_date);
+
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
