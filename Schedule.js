@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { SalonTable } = require("./Salon_signup");
 const ScheduleRouter = express.Router();
 const { ServiceAppointmentTable } = require("./ServiceAppointment");
+const { SalonServicesTable } = require("./saloonServices");
 const moment = require("moment");
 
 ScheduleRouter.get("/customers/history", async (req, res) => {
@@ -111,13 +112,24 @@ ScheduleRouter.post("/", async (req, res) => {
 	console.log("hello");
 	const only_date = moment(req.body.current_date).format("YYYY-MM-DD");
 	console.log(only_date);
-	const appointment = await ServiceAppointmentTable.find({
-		booking_date: { $gte: only_date }
+	const appointment = await ServiceAppointmentTable.findOne({
+		booking_date: { $gte: only_date } //gte
 	}).sort({ booking_date: 1 });
+	console.log(appointment);
+	const salon_name = await SalonTable.findOne({
+		_id: appointment.Salon_id
+	}).select({ SalonName: 1, _id: 0 });
+	const servicename = await SalonServicesTable.findOne({
+		_id: appointment.service_id
+	}).select({ serviceName: 1, _id: 0 });
+	const namee = salon_name["SalonName"];
+	// appointment.salon_name = namee;
+	appointment.Salon_id = namee;
+	//Object.assign(appointment, { salon_name: namee });
 
-	//console.log("only date is", appointment);
+	console.log("after", servicename);
 
-	return res.status(200).send(appointment);
+	return res.status(200).send(salon_name);
 
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
