@@ -106,7 +106,7 @@ ScheduleRouter.get("/", async (req, res) => {
 	}
 });
 
-ScheduleRouter.get("/:id", async (req, res) => {
+ScheduleRouter.get("/", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
@@ -114,8 +114,7 @@ ScheduleRouter.get("/:id", async (req, res) => {
 
 		if (decode) {
 			const customerservices = await ServiceAppointmentTable.find({
-				customer_id: req.params.id,
-				service_status: "onqueue"
+				customer_id: req.params.id
 			});
 			if (customerservices) {
 				return res.status(200).send(customerservices);

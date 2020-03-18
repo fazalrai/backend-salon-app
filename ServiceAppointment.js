@@ -39,8 +39,11 @@ const ServiceAppointmentSchema = new monogoes.Schema({
 	Salon_id: {
 		type: String
 		//	required: true
+	},
+	appointment_satus: {
+		type: Boolean,
+		required: true
 	}
-
 	//booking_date: {
 	//	type: Date,
 	//	require: true
