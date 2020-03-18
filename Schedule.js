@@ -109,28 +109,32 @@ ScheduleRouter.get("/", async (req, res) => {
 });
 
 ScheduleRouter.post("/", async (req, res) => {
-	console.log("hello");
-	const only_date = moment(req.body.current_date).format("YYYY-MM-DD");
-	console.log(only_date);
-	const appointment = await ServiceAppointmentTable.findOne({
-		booking_date: { $gte: only_date } //gte
-	}).sort({ booking_date: 1 });
-	console.log(appointment);
-	const salon_name = await SalonTable.findOne({
-		_id: appointment.Salon_id
-	}).select({ SalonName: 1, _id: 0 });
-	const servicename = await SalonServicesTable.findOne({
-		_id: appointment.service_id
-	}).select({ serviceName: 1, _id: 0 });
-	const namee = salon_name["SalonName"];
-	// appointment.salon_name = namee;
-	appointment.Salon_id = namee;
-	//Object.assign(appointment, { salon_name: namee });
+	try {
+		console.log("hello");
+		const only_date = moment(req.body.current_date).format("YYYY-MM-DD");
+		console.log(only_date);
+		const appointment = await ServiceAppointmentTable.findOne({
+			booking_date: { $gte: only_date } //gte
+		}).sort({ booking_date: 1 });
+		console.log("appoitnment is", appointment);
+		const salon_name = await SalonTable.findOne({
+			_id: appointment.Salon_id
+		}).select({ SalonName: 1, _id: 0 });
+		const servicename = await SalonServicesTable.findOne({
+			_id: appointment.service_id
+		}).select({ serviceName: 1, _id: 0 });
+		console.log("before", appointment);
+		// appointment.salon_name =servicename["serviceName"];
+		appointment.Salon_id = salon_name["SalonName"];
+		appointment.service_id = servicename["serviceName"];
+		//Object.assign(appointment, { salon_name: namee });
 
-	console.log("after", servicename);
+		console.log("after", appointment);
 
-	return res.status(200).send(salon_name);
-
+		return res.status(200).send(appointment);
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
