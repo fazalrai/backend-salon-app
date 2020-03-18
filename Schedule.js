@@ -109,14 +109,15 @@ ScheduleRouter.get("/", async (req, res) => {
 
 ScheduleRouter.post("/", async (req, res) => {
 	console.log("hello");
-	const only_date = moment(req.body.current_date).format("DD-MMM-YYYY");
+	const only_date = moment(req.body.current_date).format("YYYY-MM-DD");
+	console.log(only_date);
 	const appointment = await ServiceAppointmentTable.find({
-		booking_date: only_date
-	});
+		booking_date: { $gte: only_date }
+	}).sort({ booking_date: 1 });
 
-	console.log("only date is", appointment);
+	//console.log("only date is", appointment);
 
-	return res.status(200).send(req.body.current_date);
+	return res.status(200).send(appointment);
 
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
