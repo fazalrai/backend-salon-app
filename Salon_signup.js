@@ -42,7 +42,16 @@ const SalonSchema = new monogoes.Schema({
 	Account_verfied: {
 		type: Boolean,
 		required: true
+	},
+	Latitude: {
+		type: Number,
+		required: true
+	},
+	Longitude: {
+		type: Number,
+		required: true
 	}
+
 	//ListOfSalonServices: [String]
 });
 const SalonTable = monogoes.model("SalonOwner", SalonSchema);
@@ -70,7 +79,9 @@ SalonRouter.post("/", async (req, res) => {
 			SalonName: req.body.salonname,
 			Salon_opening_hours: req.body.Salon_opening_hours,
 			Salon_closing_hours: req.body.Salon_closing_hours,
-			Account_verfied: false
+			Account_verfied: false,
+			Latitude: req.body.latitude,
+			Longitude: req.body.longitude
 		});
 		const salt = await bcrypt.genSalt(10);
 		newSalon.password = await bcrypt.hash(newSalon.password, salt);

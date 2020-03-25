@@ -116,7 +116,8 @@ ScheduleRouter.post("/", async (req, res) => {
 		const appointment = await ServiceAppointmentTable.findOne({
 			booking_date: { $gte: only_date } //gte
 		}).sort({ booking_date: 1 });
-		console.log("appoitnment is", appointment);
+		if (!appointment) res.status(400).send("no appintment exist");
+		//	console.log("appoitnment is", appointment);
 		const salon_name = await SalonTable.findOne({
 			_id: appointment.Salon_id
 		}).select({ SalonName: 1, _id: 0 });
