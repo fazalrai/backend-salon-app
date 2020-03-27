@@ -50,8 +50,10 @@ const SalonSchema = new monogoes.Schema({
 	Longitude: {
 		type: Number,
 		required: true
+	},
+	Salon_availibilty: {
+		type: Boolean
 	}
-
 	//ListOfSalonServices: [String]
 });
 const SalonTable = monogoes.model("SalonOwner", SalonSchema);
@@ -81,7 +83,8 @@ SalonRouter.post("/", async (req, res) => {
 			Salon_closing_hours: req.body.Salon_closing_hours,
 			Account_verfied: false,
 			Latitude: req.body.latitude,
-			Longitude: req.body.longitude
+			Longitude: req.body.longitude,
+			Salon_availibilty: true
 		});
 		const salt = await bcrypt.genSalt(10);
 		newSalon.password = await bcrypt.hash(newSalon.password, salt);
@@ -247,7 +250,9 @@ SalonRouter.get("/", async (req, res) => {
 				SalonName: 1,
 				Salon_opening_hours: 1,
 				Salon_closing_hours: 1,
-				_id: 1
+				_id: 1,
+				Latitude: 1,
+				Longitude: 1
 			});
 			return res.status(200).send(salon);
 		}
@@ -255,5 +260,6 @@ SalonRouter.get("/", async (req, res) => {
 		return res.status(400).send(exc.message);
 	}
 });
+
 module.exports.SalonRouter = SalonRouter;
 module.exports.SalonTable = SalonTable;
