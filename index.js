@@ -11,7 +11,7 @@ const SuperAdmin_login_router = require("./SuperAdminlogin");
 const service_appointment_router = require("./ServiceAppointment");
 const customer_schedule_router = require("./Schedule");
 const { Salon_Schedule_router } = require("./SalonSchedule");
-
+const { salon_availibilty_router } = require("./salon_availivilty");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
@@ -95,6 +95,7 @@ app.use(
 	service_appointment_router.ServiceAppointmentRouter
 );
 
+app.use("/Digital_Saloon.com/api/Salon/availibilty", salon_availibilty_router);
 // monogoes
 // 	.connect("mongodb://localhost/fypdatabase")
 // 	.then(() => console.log("connected successfuly"))
