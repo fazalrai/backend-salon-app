@@ -11,7 +11,8 @@ salon_availibilty_router.post("/", async (req, res) => {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 
 		if (decode) {
-			const salon = await SalonTable.findOne({ _id: decode._id });
+			const salon = await SalonTable.findById(decode.id);
+			console.log("salon is", salon);
 			salon.Salon_availibilty = req.body.salon_availaible;
 			const result = await salon.save();
 			return res.status(200).send(result);
