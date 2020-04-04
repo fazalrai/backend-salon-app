@@ -2,15 +2,6 @@ const monogoes = require("mongoose");
 const express = require("express");
 const multer = require("multer");
 const bucket = require("./index");
-const uploadImage = require("./image_upload_helper");
-
-// const multerMid = multer({
-// 	storage: multer.memoryStorage(),
-// 	limits: {
-// 		// no larger than 5mb.
-// 		fileSize: 5 * 1024 * 1024
-// 	}
-// });
 const storage = multer.diskStorage({
 	destination: function(req, file, cb) {
 		cb(null, "./public");
@@ -32,23 +23,22 @@ const upload = multer(
 );
 const jwt = require("jsonwebtoken");
 const { SalonTable } = require("./Salon_signup");
-const saloonServicesRouter = express.Router();
-const saloonServicesSchema = new monogoes.Schema({
+const recomend_services_router = express.Router();
+const recomend_services_schema = new monogoes.Schema({
 	serviceName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	servicePrice: { type: Number, required: true, minlength: 1 },
 	serviceDescription: { type: String, required: true, minlength: 10 },
-	image_url: { type: String, required: true },
+	image: { type: String, required: true },
 	service_category: { type: String, required: true },
-	Salon_id: { type: String, required: true },
 	service_time: { type: Number, required: false }
 	//	ServiceAvgRating: { type: Number }
 });
-const SalonServicesTable = monogoes.model(
-	"SalonServicesTable",
-	saloonServicesSchema
+const recomended_services_table = monogoes.model(
+	"recomended_services_table",
+	recomend_services_schema
 );
 // To get salon service of particular salon
-saloonServicesRouter.get(
+recomend_services_router.get(
 	"/",
 
 	async (req, res) => {
@@ -62,9 +52,7 @@ saloonServicesRouter.get(
 			const decode = jwt.verify(token, "login_jwt_privatekey");
 
 			if (decode) {
-				const allservices = await SalonServicesTable.find({
-					Salon_id: decode.id
-				}).sort("name");
+				const allservices = await SalonServicesTable.find({}).sort("name");
 				res.status(200).send(allservices);
 			}
 		} catch (exc) {
@@ -178,11 +166,6 @@ saloonServicesRouter.delete("/:id", async (req, res) => {
 	}
 });
 
-/*Userrouter.del('/:id', async (req,res)=>{
-Users.deleteOne(req.params.id)
-console.log(req.send("successfuly deleted"));
-})*/
-
 saloonServicesRouter.put("/:id", async (req, res) => {
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
@@ -212,82 +195,66 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 	}
 	//	(user2.phoneNumber = req.body.phnnbr);
 });
-//upload.single("image"), function to be called if u want to store images locaaly
-saloonServicesRouter.post("/", async (req, res) => {
+
+saloonServicesRouter.post("/", upload.single("image"), async (req, res) => {
 	try {
 		//console.log("hello");
 		//	console.log("eader is ", req.header("x-auth-token"));
 		//	console.log(req.headers);
 		//	console.log(req.headers("x-auth-token"));
-		const token = req.header("x-auth-token");
-		if (!token) return res.status(401).send("Access denied ,No token provided");
-		const decode = jwt.verify(token, "login_jwt_privatekey");
-		if (decode) {
-			//--	try {
-			// const { originalname, buffer } = req.file;
-			// const file = req.file;
-			// const blob = bucket.bucket.file(originalname.replace(/ /g, "_"));
-			// console.log(" before published");
-			// const blobStream = blob.createWriteStream({
-			// 	resumable: false
-			// });
+		//	const token = req.header("x-auth-token");
+		//	if (!token) return res.status(401).send("Access denied ,No token provided");
+		//	try {
+		//	const decode = jwt.verify(token, "login_jwt_privatekey");
+		//	if (decode) {
+		try {
+			const imgurl = await bucket.bucket.upload(req.file.path, {
+				resumable: true
+			});
+		} catch (error) {
+			return res.status(400).send(error.message);
+		}
+		const public_url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+		console.log("image url is", imgurl);
+		try {
+			const newService = new SalonServicesTable({
+				serviceName: req.body.servicename,
+				servicePrice: req.body.price,
+				serviceDescription: req.body.description,
+				image: req.file.path,
+				service_category: req.body.service_category,
+				Salon_id: decode.id,
+				service_time: req.body.service_time
+			});
 
 			try {
-				const myFile = req.file;
-				const imageUrl = await uploadImage.uploadImage(myFile);
-				// res.status(200).json({
-				// 	message: "Upload was successful",
-				// 	data: imageUrl
-				// });
-
-				const newService = new SalonServicesTable({
-					serviceName: req.body.servicename,
-					servicePrice: req.body.price,
-					serviceDescription: req.body.description,
-					image_url: imageUrl,
-					service_category: req.body.service_category,
-					Salon_id: decode.id,
-					service_time: req.body.service_time
-				});
+				//	console.log(newService);
 				const result = await newService.save();
+				//	console.log(result);
 				return res.status(200).send(result);
-			} catch (error) {
-				return res.status(400).send(error.message);
+				//	const Salon = await SalonTable.find({ _id: decode.id });
+				// const addservice = await SalonTable.update(
+				// 	{
+				// 		_id: decode.id
+				// 	},
+				// 	{ $push: { ListOfSalonServices: result._id } }
+				// );
+				//	return res.status(200).send(result);
+			} catch (ex) {
+				return res.status(400).send(ex.message);
 			}
-
-			// const publicUrl = "";
-			// blobStream.on("finish", () => {
-			// 	publicUrl = format(
-			// 		`https://storage.googleapis.com/${bucket.name}/${blob.name}`
-			// 	);
-			// });
-			// console.log("public url is", publicUrl);
-			// // const imgurl = await bucket.bucket.upload(file, {
-			// 	resumable: true
-			// });
-			// const publicUrl = format(
-			// 	`https://storage.googleapis.com/${bucket.bucket.name}/${blob.name}`
-			// );
-
-			//	const public_url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-
-			//	console.log("image url is", publicUrl);
-
-			//	console.log(newService);
-			//	console.log(result);
-			//	const Salon = await SalonTable.find({ _id: decode.id });
-			// const addservice = await SalonTable.update(
-			// 	{
-			// 		_id: decode.id
-			// 	},
-			// 	{ $push: { ListOfSalonServices: result._id } }
-			// );
-			//	return res.status(200).send(result);
+		} catch (ex) {
+			return res.status(400).send(ex.message);
 		}
-	} catch (error) {
-		return res.status(400).send(error.message);
-		//console.log(error.message);
+		//}
+	} catch (ex) {
+		return res.status(400).send("Invalid token");
 	}
+	// } catch (error) {
+	// 	return res.status(400).send(error.message);
+	// 	//console.log(error.message);
+	// }
 });
 // saloonServicesRouter.post("/", async (req, res) => {
 // 	return res.send("hello world");

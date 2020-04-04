@@ -1,4 +1,8 @@
 const monogoes = require("mongoose");
+const path = require("path");
+const { Storage } = require("@google-cloud/storage");
+const multer = require("multer");
+
 const express = require("express");
 const bodyparser = require("body-parser");
 const UserSignup_router = require("./UsersSignup");
@@ -15,15 +19,35 @@ const { salon_availibilty_router } = require("./salon_availivilty");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
-//const multer = require("multer");
-//const config = require("config");
-//const userroute = require("./addusers");
-//const auth = require("./auth");
+const gcobject = new Storage({
+	keyFilename: path.join(
+		__dirname,
+		"./config/uploading-images-272407-55aa055e5526.json"
+	),
+	projectId: "uploading-images-272407"
+});
+
+const bucket = gcobject.bucket("fyp-images");
+const multerMid = multer({
+	storage: multer.memoryStorage(),
+	limits: {
+		// no larger than 5mb.
+		fileSize: 5 * 1024 * 1024
+	}
+});
+
 const cors = require("cors");
 connectDB();
+
 const app = express();
+
+app.disable("x-powered-by");
+app.use(multerMid.single("image"));
+app.use(bodyparser.json());
+app.use(bodyparser.urlencoded({ extended: false }));
+
 app.use(express.static("public"));
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 //app.use(multer());
 // app.use(
 // 	cors({
@@ -94,14 +118,14 @@ app.use(
 	"/Digital_Saloon.com/api/book/appointment",
 	service_appointment_router.ServiceAppointmentRouter
 );
-
+bucket.getFiles().then(function(data) {
+	const files = data[0];
+	//console.log("files are", files);
+});
 app.use("/Digital_Saloon.com/api/Salon/availibilty", salon_availibilty_router);
-// monogoes
-// 	.connect("mongodb://localhost/fypdatabase")
-// 	.then(() => console.log("connected successfuly"))
-// 	.catch(() => console.error("Couldnot connected to mongodb.."));
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("Listening succesfully on port ...", port));
-//UserSignup_router.Creatuser();
-//module.exports.db = db;
-//console.log();
+console.log(__dirname);
+console.log(__filename);
+
+module.exports.bucket = bucket;
