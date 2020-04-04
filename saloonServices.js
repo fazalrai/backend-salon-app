@@ -195,11 +195,17 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 			} catch (ex) {
 				return res.status(400).send("Invalid id");
 			}
+			const myFile = req.file;
+			const imageUrl = await uploadImage.uploadImage(myFile);
+
 			(user2.serviceName = req.body.servicename),
 				(user2.servicePrice = req.body.price),
 				(user2.serviceDescription = req.body.description),
-				(user2.image = req.file.path),
-				(user2.service_category = req.body.service_category);
+				(user2.image_url = imageUrl),
+				(user2.service_category = req.body.service_category)(
+					(user2.service_time = req.body.service_time)
+				);
+
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
