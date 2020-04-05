@@ -64,7 +64,7 @@ saloonServicesRouter.get(
 			if (decode) {
 				const allservices = await SalonServicesTable.find({
 					Salon_id: decode.id
-				}).sort("name");
+				}).sort("service_category");
 				return res.status(200).send(allservices);
 			}
 		} catch (exc) {
@@ -88,7 +88,7 @@ saloonServicesRouter.get(
 			if (decode) {
 				const allservices = await SalonServicesTable.find({
 					Salon_id: req.params.Salon_id
-				}).sort("name");
+				}).sort("");
 				res.status(200).send(allservices);
 			}
 		} catch (exc) {
