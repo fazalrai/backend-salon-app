@@ -16,6 +16,9 @@ const service_appointment_router = require("./ServiceAppointment");
 const customer_schedule_router = require("./Schedule");
 const { Salon_Schedule_router } = require("./SalonSchedule");
 const { salon_availibilty_router } = require("./salon_availivilty");
+const {
+	recomended_service_router
+} = require("./Reomeneded_services_by_super_admin");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
 const compression = require("compression");
@@ -117,6 +120,10 @@ app.use("/Digital_Saloon.com/api/Saloon_owner/schedule", Salon_Schedule_router);
 app.use(
 	"/Digital_Saloon.com/api/book/appointment",
 	service_appointment_router.ServiceAppointmentRouter
+);
+app.use(
+	"/Digital_Saloon.com/api/recomended_services",
+	recomended_service_router
 );
 bucket.getFiles().then(function(data) {
 	const files = data[0];

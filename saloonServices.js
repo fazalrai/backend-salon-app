@@ -65,7 +65,7 @@ saloonServicesRouter.get(
 				const allservices = await SalonServicesTable.find({
 					Salon_id: decode.id
 				}).sort("name");
-				res.status(200).send(allservices);
+				return res.status(200).send(allservices);
 			}
 		} catch (exc) {
 			res.status(400).send("Invalid token");
