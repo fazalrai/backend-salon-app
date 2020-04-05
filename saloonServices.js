@@ -39,8 +39,8 @@ const saloonServicesSchema = new monogoes.Schema({
 	serviceDescription: { type: String, required: true, minlength: 10 },
 	image_url: { type: String, required: true },
 	service_category: { type: String, required: true },
-	Salon_id: { type: String, required: true },
-	service_time: { type: Number, required: false }
+	Salon_id: { type: String, required: true }
+	//	service_time: { type: Number, required: false }
 	//	ServiceAvgRating: { type: Number }
 });
 const SalonServicesTable = monogoes.model(
@@ -202,9 +202,8 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 				(user2.servicePrice = req.body.price),
 				(user2.serviceDescription = req.body.description),
 				(user2.image_url = imageUrl),
-				(user2.service_category = req.body.service_category)(
-					(user2.service_time = req.body.service_time)
-				);
+				(user2.service_category = req.body.service_category),
+				(user2.service_time = req.body.service_time);
 
 			try {
 				const result = await user2.save();
