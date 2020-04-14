@@ -12,12 +12,12 @@ const uploadImage = require("./image_upload_helper");
 // 	}
 // });
 const storage = multer.diskStorage({
-	destination: function(req, file, cb) {
+	destination: function (req, file, cb) {
 		cb(null, "./public");
 	},
-	filename: function(req, file, cb) {
+	filename: function (req, file, cb) {
 		cb(null, new Date().now + file.originalname);
-	}
+	},
 });
 const filefilter = (req, file, cb) => {
 	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
@@ -39,7 +39,7 @@ const saloonServicesSchema = new monogoes.Schema({
 	serviceDescription: { type: String, required: true, minlength: 10 },
 	image_url: { type: String, required: true },
 	service_category: { type: String, required: true },
-	Salon_id: { type: String, required: true }
+	Salon_id: { type: String, required: true },
 	//	service_time: { type: Number, required: false }
 	//	ServiceAvgRating: { type: Number }
 });
@@ -63,7 +63,7 @@ saloonServicesRouter.get(
 
 			if (decode) {
 				const allservices = await SalonServicesTable.find({
-					Salon_id: decode.id
+					Salon_id: decode.id,
 				}).sort("service_category");
 				return res.status(200).send(allservices);
 			}
@@ -87,7 +87,7 @@ saloonServicesRouter.get(
 
 			if (decode) {
 				const allservices = await SalonServicesTable.find({
-					Salon_id: req.params.Salon_id
+					Salon_id: req.params.Salon_id,
 				}).sort("");
 				res.status(200).send(allservices);
 			}
@@ -111,7 +111,7 @@ saloonServicesRouter.get(
 
 			if (decode) {
 				const allservices = await SalonServicesTable.find({
-					_id: req.params.Service_id
+					_id: req.params.Service_id,
 				}).sort("name");
 				res.status(200).send(allservices);
 			}
@@ -228,22 +228,9 @@ saloonServicesRouter.post("/", async (req, res) => {
 		if (!token) return res.status(401).send("Access denied ,No token provided");
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
-			//--	try {
-			// const { originalname, buffer } = req.file;
-			// const file = req.file;
-			// const blob = bucket.bucket.file(originalname.replace(/ /g, "_"));
-			// console.log(" before published");
-			// const blobStream = blob.createWriteStream({
-			// 	resumable: false
-			// });
-
 			try {
 				const myFile = req.file;
 				const imageUrl = await uploadImage.uploadImage(myFile);
-				// res.status(200).json({
-				// 	message: "Upload was successful",
-				// 	data: imageUrl
-				// });
 
 				const newService = new SalonServicesTable({
 					serviceName: req.body.servicename,
@@ -252,7 +239,7 @@ saloonServicesRouter.post("/", async (req, res) => {
 					image_url: imageUrl,
 					service_category: req.body.service_category,
 					Salon_id: decode.id,
-					service_time: req.body.service_time
+					service_time: req.body.service_time,
 				});
 				const result = await newService.save();
 				return res.status(200).send(result);
@@ -291,12 +278,9 @@ saloonServicesRouter.post("/", async (req, res) => {
 		}
 	} catch (error) {
 		return res.status(400).send(error.message);
-		//console.log(error.message);
 	}
 });
-// saloonServicesRouter.post("/", async (req, res) => {
-// 	return res.send("hello world");
-// });
+
 module.exports.SalonServicesTable = SalonServicesTable;
 module.exports.saloonServicesRouter = saloonServicesRouter;
 //module.exports.servce = servce;

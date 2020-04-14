@@ -10,7 +10,7 @@ const SuperAdminSchema = new monogoes.Schema({
 	SuperAdminName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	SuperAdminEmail: { type: String, required: true, minlength: 7 },
 	password: { type: String, required: true, minlength: 8, maxlength: 70 },
-	phonenumber: { type: Number, required: true, minlength: 11, maxlength: 15 }
+	phonenumber: { type: Number, required: true, minlength: 11, maxlength: 15 },
 	//	isAdmin: Boolean
 });
 const SuperAdminTable = monogoes.model("SuperAdminTable", SuperAdminSchema);
@@ -24,7 +24,7 @@ SuperadminRouter.post("/", async (req, res) => {
 		SuperAdminName: req.body.name,
 		SuperAdminEmail: req.body.email,
 		password: req.body.password,
-		phonenumber: req.body.phonenumber
+		phonenumber: req.body.phonenumber,
 	});
 	const salt = await bcrypt.genSalt(10);
 	newsuperadmin.password = await bcrypt.hash(newsuperadmin.password, salt);
@@ -35,10 +35,7 @@ SuperadminRouter.post("/", async (req, res) => {
 			{ Super_admin_login: true, id: result._id },
 			"login_jwt_privatekey"
 		);
-		return res
-			.status(200)
-			.header("x-auth-token", token)
-			.send(result);
+		return res.status(200).header("x-auth-token", token).send(result);
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
@@ -65,7 +62,7 @@ SuperadminRouter.delete("/:id", async (req, res) => {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			let result = await SalonTable.findById(req.params.id);
-			const r1 = result.remove();
+			const r1 = await result.remove();
 			const remainig_salon = await SalonTable.find({ Account_verfied: false });
 			let transporter = nodemailer.createTransport({
 				service: "Gmail",
@@ -74,18 +71,18 @@ SuperadminRouter.delete("/:id", async (req, res) => {
 
 				auth: {
 					user: "fa16-bcs-347@cuilahore.edu.pk",
-					pass: "pmlnpmln1234"
-				}
+					pass: "pmlnpmln1234",
+				},
 			});
 
 			let mailOptions = {
 				from: "fa16-bcs-347@cuilahore.edu.pk",
 				to: result.SalonOwnerEmail,
 				subject: "Account verfication",
-				text: "Your account can not been verified due to some reasons"
+				text: "Your account can not been verified due to some reasons",
 			};
 
-			transporter.sendMail(mailOptions, function(err, info) {
+			transporter.sendMail(mailOptions, function (err, info) {
 				if (err) {
 					return res.status(400).send(err);
 				}
@@ -104,7 +101,7 @@ SuperadminRouter.get("/:id", async (req, res) => {
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
-			const salon = await SalonTable.findOne({ _id: req.params.id });
+			const salon = await SalonTable.findById(req.params.id);
 			console.log(salon);
 
 			salon.Account_verfied = true;
@@ -119,8 +116,8 @@ SuperadminRouter.get("/:id", async (req, res) => {
 
 				auth: {
 					user: "fa16-bcs-347@cuilahore.edu.pk",
-					pass: "pmlnpmln1234"
-				}
+					pass: "pmlnpmln1234",
+				},
 			});
 
 			let mailOptions = {
@@ -128,10 +125,10 @@ SuperadminRouter.get("/:id", async (req, res) => {
 				to: salon.SalonOwnerEmail,
 				subject: "Account verfication",
 				text:
-					"Your account has been vaerified successfully.Click the given below link to proceed login"
+					"Your account has been vaerified successfully.Click the given below link to proceed login",
 			};
 
-			transporter.sendMail(mailOptions, function(err, info) {
+			transporter.sendMail(mailOptions, function (err, info) {
 				if (err) {
 					return res.status(400).send(err);
 				}
@@ -157,7 +154,7 @@ SuperadminRouter.put("/", async (req, res) => {
 			}
 			const user = await SuperAdminTable.findOne({
 				SuperAdminEmail: req.body.email,
-				_id: { $ne: decode.id }
+				_id: { $ne: decode.id },
 			});
 			if (user) return res.status(400).send("Email already exist");
 

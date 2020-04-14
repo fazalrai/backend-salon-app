@@ -17,7 +17,10 @@ const customer_schedule_router = require("./Schedule");
 const { Salon_Schedule_router } = require("./SalonSchedule");
 const { salon_availibilty_router } = require("./salon_availivilty");
 const {
-	recomended_service_router
+	customer_recomendation_for_nearest_salon_router,
+} = require("./customer_recomendation_for_neraest_salon");
+const {
+	recomended_service_router,
 } = require("./Reomeneded_services_by_super_admin");
 const connectDB = require("./connectivity");
 const helmet = require("helmet");
@@ -27,7 +30,7 @@ const gcobject = new Storage({
 		__dirname,
 		"./config/uploading-images-272407-55aa055e5526.json"
 	),
-	projectId: "uploading-images-272407"
+	projectId: "uploading-images-272407",
 });
 
 const bucket = gcobject.bucket("fyp-images");
@@ -35,8 +38,8 @@ const multerMid = multer({
 	storage: multer.memoryStorage(),
 	limits: {
 		// no larger than 5mb.
-		fileSize: 5 * 1024 * 1024
-	}
+		fileSize: 5 * 1024 * 1024,
+	},
 });
 
 const cors = require("cors");
@@ -69,7 +72,7 @@ app.use(express.json());
 //app.use(cors());
 app.use(
 	cors({
-		exposedHeaders: ["x-auth-token"]
+		exposedHeaders: ["x-auth-token"],
 	})
 );
 app.use((req, res, next) => {
@@ -125,7 +128,11 @@ app.use(
 	"/Digital_Saloon.com/api/recomended_services",
 	recomended_service_router
 );
-bucket.getFiles().then(function(data) {
+app.use(
+	"/Digital_Saloon.com/api/recomended_nearest_salon",
+	customer_recomendation_for_nearest_salon_router
+);
+bucket.getFiles().then(function (data) {
 	const files = data[0];
 	//console.log("files are", files);
 });

@@ -4,20 +4,13 @@ const multer = require("multer");
 const bucket = require("./index");
 const uploadImage = require("./image_upload_helper");
 
-// const multerMid = multer({
-// 	storage: multer.memoryStorage(),
-// 	limits: {
-// 		// no larger than 5mb.
-// 		fileSize: 5 * 1024 * 1024
-// 	}
-// });
 const storage = multer.diskStorage({
-	destination: function(req, file, cb) {
+	destination: function (req, file, cb) {
 		cb(null, "./public");
 	},
-	filename: function(req, file, cb) {
+	filename: function (req, file, cb) {
 		cb(null, new Date().now + file.originalname);
-	}
+	},
 });
 const filefilter = (req, file, cb) => {
 	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
@@ -39,9 +32,7 @@ const recomended_service_schema = new monogoes.Schema({
 	serviceDescription: { type: String, required: true, minlength: 10 },
 	image_url: { type: String, required: true },
 	service_category: { type: String, required: true },
-	//Salon_id: { type: String, required: true },
-	service_time: { type: Number, required: false }
-	//	ServiceAvgRating: { type: Number }
+	service_time: { type: Number, required: false },
 });
 const recomended_service_table = monogoes.model(
 	"recomended_service_table",
@@ -99,7 +90,7 @@ recomended_service_router.delete("/:id", async (req, res) => {
 			try {
 				let result = await recomended_service_table.findById(req.params.id);
 				console.log(result);
-				const r1 = result.remove();
+				const r1 = await result.remove();
 				return res.status(200).send("Service deleted successfuuly");
 			} catch (exc) {
 				return res.status(400).send("invalid id");
@@ -143,15 +134,10 @@ recomended_service_router.put("/:id", async (req, res) => {
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
-	//	(user2.phoneNumber = req.body.phnnbr);
 });
 //upload.single("image"), function to be called if u want to store images locaaly
 recomended_service_router.post("/", async (req, res) => {
 	try {
-		//console.log("hello");
-		//	console.log("eader is ", req.header("x-auth-token"));
-		//	console.log(req.headers);
-		//	console.log(req.headers("x-auth-token"));
 		const token = req.header("x-auth-token");
 		if (!token) return res.status(401).send("Access denied ,No token provided");
 		const decode = jwt.verify(token, "login_jwt_privatekey");
@@ -159,10 +145,6 @@ recomended_service_router.post("/", async (req, res) => {
 			try {
 				const myFile = req.file;
 				const imageUrl = await uploadImage.uploadImage(myFile);
-				// res.status(200).json({
-				// 	message: "Upload was successful",
-				// 	data: imageUrl
-				// });
 
 				const newService = new recomended_service_table({
 					serviceName: req.body.servicename,
@@ -170,7 +152,7 @@ recomended_service_router.post("/", async (req, res) => {
 					serviceDescription: req.body.description,
 					image_url: imageUrl,
 					service_category: req.body.service_category,
-					service_time: req.body.service_time
+					service_time: req.body.service_time,
 				});
 				const result = await newService.save();
 				return res.status(200).send(result);

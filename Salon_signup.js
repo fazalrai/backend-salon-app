@@ -8,13 +8,13 @@ const SalonSchema = new monogoes.Schema({
 		type: String,
 		required: true,
 		minlength: 3,
-		maxlength: 20
+		maxlength: 20,
 	},
 	Salon_owner_lastName: {
 		type: String,
 		required: true,
 		minlength: 3,
-		maxlength: 20
+		maxlength: 20,
 	},
 	SalonOwnerEmail: { type: String, required: true, minlength: 7 },
 	password: { type: String, required: true, minlength: 8, maxlength: 70 },
@@ -22,38 +22,38 @@ const SalonSchema = new monogoes.Schema({
 		type: Number,
 		required: true,
 		minlength: 10,
-		maxlength: 15
+		maxlength: 15,
 	},
 	SalonOwnerCnic: {
 		type: Number,
 		required: true,
 		minlength: 10,
-		maxlength: 20
+		maxlength: 20,
 	},
 	SalonName: { type: String, required: true, minlength: 3 },
 	Salon_opening_hours: {
 		type: String,
-		required: true
+		required: true,
 	},
 	Salon_closing_hours: {
 		type: String,
-		required: true
+		required: true,
 	},
 	Account_verfied: {
 		type: Boolean,
-		required: true
+		required: true,
 	},
 	Latitude: {
 		type: Number,
-		required: true
+		required: true,
 	},
 	Longitude: {
 		type: Number,
-		required: true
+		required: true,
 	},
 	Salon_availibilty: {
-		type: Boolean
-	}
+		type: Boolean,
+	},
 	//ListOfSalonServices: [String]
 });
 const SalonTable = monogoes.model("SalonOwner", SalonSchema);
@@ -62,11 +62,11 @@ SalonRouter.post("/", async (req, res) => {
 	console.log(req.body);
 	try {
 		let salon = await SalonTable.findOne({
-			SalonOwnerEmail: req.body.email
+			SalonOwnerEmail: req.body.email,
 		});
 		if (salon) return res.status(400).send("Email already exist");
 		salon = await SalonTable.findOne({
-			SalonOwnerphoneNumber: req.body.phoneNumber
+			SalonOwnerphoneNumber: req.body.phoneNumber,
 		});
 		if (salon) return res.status(400).send("Phone number already exist");
 		salon = await SalonTable.findOne({ SalonOwnerCnic: req.body.cnic });
@@ -84,14 +84,14 @@ SalonRouter.post("/", async (req, res) => {
 			Account_verfied: false,
 			Latitude: req.body.latitude,
 			Longitude: req.body.longitude,
-			Salon_availibilty: true
+			Salon_availibilty: true,
 		});
 		const salt = await bcrypt.genSalt(10);
 		newSalon.password = await bcrypt.hash(newSalon.password, salt);
 		try {
 			await newSalon
 				.save()
-				.then(result => {
+				.then((result) => {
 					const token = jwt.sign(
 						{ newSalon_account: true, id: result._id },
 						"login_jwt_privatekey"
@@ -104,7 +104,7 @@ SalonRouter.post("/", async (req, res) => {
 					);
 				})
 
-				.catch(error => {
+				.catch((error) => {
 					return res.status(400).send(error.message);
 				});
 		} catch (error) {
@@ -129,12 +129,12 @@ SalonRouter.put("/", async (req, res) => {
 
 			const user = await SalonTable.findOne({
 				SalonOwnerEmail: req.body.email,
-				_id: { $ne: decode.id }
+				_id: { $ne: decode.id },
 			});
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await SalonTable.findOne({
 				SalonOwnerphoneNumber: req.body.phoneNumber,
-				_id: { $ne: decode.id }
+				_id: { $ne: decode.id },
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
@@ -142,12 +142,14 @@ SalonRouter.put("/", async (req, res) => {
 				(user2.SalonOwnerEmail = req.body.email),
 				(user2.SalonOwnerphoneNumber = req.body.phoneNumber),
 				(user2.SalonOwnerCnic = req.body.cnic),
-				(user2.SalonName = req.body.salonname);
+				(user2.SalonName = req.body.salonname),
+				(user2.Salon_opening_hours = req.body.Salon_opening_hours),
+				(user2.Salon_closing_hours = req.body.Salon_closing_hours);
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (exc) {
@@ -248,14 +250,14 @@ SalonRouter.get("/", async (req, res) => {
 		if (decode) {
 			const salon = await SalonTable.find({
 				Account_verfied: true,
-				Salon_availibilty: true
+				Salon_availibilty: true,
 			}).select({
 				SalonName: 1,
 				Salon_opening_hours: 1,
 				Salon_closing_hours: 1,
 				_id: 1,
 				Latitude: 1,
-				Longitude: 1
+				Longitude: 1,
 			});
 			return res.status(200).send(salon);
 		}

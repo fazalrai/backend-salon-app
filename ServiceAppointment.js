@@ -12,34 +12,34 @@ const ServiceAppointmentRouter = express.Router();
 //  "preset": "jest-expo"
 const ServiceAppointmentSchema = new monogoes.Schema({
 	customer_id: {
-		type: String
+		type: String,
 		//required: true
 	},
 	service_id: {
-		type: String
+		type: String,
 		//required: true
 	},
 	service_status: {
 		type: String,
 		//required: false,
-		enum: ["availed", "onqueue"]
+		enum: ["availed", "onqueue"],
 	},
 	booking_date: {
-		type: Date
+		type: Date,
 		//	required: true
 	},
 	stating_time: {
-		type: String
+		type: String,
 		//	required: true
 	},
 	ending_time: {
-		type: String
+		type: String,
 		//	required: true
 	},
 	Salon_id: {
-		type: String
+		type: String,
 		//	required: true
-	}
+	},
 	// appointment_satus: {
 	// 	type: Boolean,
 	// 	required: true
@@ -62,18 +62,19 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 
 		console.log("hello", req.params.id);
+
 		const Salon_id = await SalonServicesTable.findOne({
-			_id: req.params.id
+			_id: req.params.id,
 		}).select({ Salon_id: 1, service_time: 1, _id: 0 });
 
 		//console.log("salon id is", Salon_id.Salon_id);
 		//	const a = await SalonTable.find();
 		const Salon_timings = await SalonTable.findOne({
-			_id: Salon_id.Salon_id
+			_id: Salon_id.Salon_id,
 		}).select({
 			Salon_opening_hours: 1,
 			Salon_closing_hours: 1,
-			_id: 0
+			_id: 0,
 		});
 
 		console.log("salon opening and closing", Salon_timings);
@@ -95,7 +96,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 		}
 
 		const appointment_date = await ServiceAppointmentTable.find({
-			booking_date: req.body.booking_date
+			booking_date: req.body.booking_date,
 		}).select({ stating_time: 1, ending_time: 1, _id: 0 });
 
 		console.log("appointment data is", appointment_date);
@@ -113,7 +114,8 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 				Salon_id: Salon_id.Salon_id,
 				booking_date: req.body.booking_date,
 				stating_time: request_boking_time,
-				ending_time: req_end_time
+				ending_time: req_end_time,
+				service_status: "onqueue",
 			});
 
 			try {
@@ -133,7 +135,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 				);
 				const req_time_range = moment.range(request_boking_time, req_end_time);
 				console.log("req time range ", req_time_range);
-				appointment_date.map(item => {
+				appointment_date.map((item) => {
 					let start_time = moment(item.stating_time);
 					let end_time = moment(item.ending_time);
 					let range = moment.range(start_time, end_time);
@@ -162,7 +164,8 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 						Salon_id: Salon_id,
 						booking_date: req.body.booking_date,
 						stating_time: start_time,
-						ending_time: end_time
+						ending_time: end_time,
+						service_status: "onqueue",
 					});
 					try {
 						const result = await appointment.save();
