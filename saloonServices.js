@@ -209,7 +209,7 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (ex) {
