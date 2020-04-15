@@ -2,12 +2,12 @@ const monogoes = require("mongoose");
 const express = require("express");
 const multer = require("multer");
 const storage = multer.diskStorage({
-	destination: function(req, file, cb) {
+	destination: function (req, file, cb) {
 		cb(null, "./public");
 	},
-	filename: function(req, file, cb) {
+	filename: function (req, file, cb) {
 		cb(null, new Date().now + file.originalname);
-	}
+	},
 });
 const filefilter = (req, file, cb) => {
 	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
@@ -30,7 +30,7 @@ const super_admin_service_schema = new monogoes.Schema({
 	image: { type: String, required: true },
 	service_category: { type: String, required: true },
 	//Salon_id: { type: String, required: true },
-	service_time: { type: Number, required: true }
+	service_time: { type: Number, required: true },
 	//	ServiceAvgRating: { type: Number }
 });
 const super_admin_service_table = monogoes.model(
@@ -137,16 +137,19 @@ super_admin_service_router.put("/:id", async (req, res) => {
 			} catch (ex) {
 				return res.status(400).send("Invalid id");
 			}
+			const myFile = req.file;
+			const imageUrl = await uploadImage.uploadImage(myFile);
+
 			(user2.serviceName = req.body.servicename),
 				(user2.servicePrice = req.body.price),
 				(user2.serviceDescription = req.body.description),
-				(user2.image = req.file.path),
+				(user2.image = imageUrl),
 				(user2.service_category = req.body.service_category);
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (ex) {
@@ -177,7 +180,7 @@ super_admin_service_router.post(
 							serviceDescription: req.body.description,
 							image: req.file.path,
 							service_category: req.body.service_category,
-							service_time: req.body.service_time
+							service_time: req.body.service_time,
 						});
 
 						try {
