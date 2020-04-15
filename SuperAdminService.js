@@ -1,6 +1,8 @@
 const monogoes = require("mongoose");
 const express = require("express");
 const multer = require("multer");
+const uploadImage = require("./image_upload_helper");
+
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		cb(null, "./public");
@@ -158,60 +160,58 @@ super_admin_service_router.put("/:id", async (req, res) => {
 	//	(user2.phoneNumber = req.body.phnnbr);
 });
 
-super_admin_service_router.post(
-	"/",
-	upload.single("image"),
-	async (req, res) => {
+super_admin_service_router.post("/", async (req, res) => {
+	try {
+		//console.log("hello");
+		//	console.log("eader is ", req.header("x-auth-token"));
+		//	console.log(req.headers);
+		//	console.log(req.headers("x-auth-token"));
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
 		try {
-			//console.log("hello");
-			//	console.log("eader is ", req.header("x-auth-token"));
-			//	console.log(req.headers);
-			//	console.log(req.headers("x-auth-token"));
-			const token = req.header("x-auth-token");
-			if (!token)
-				return res.status(401).send("Access denied ,No token provided");
-			try {
-				const decode = jwt.verify(token, "login_jwt_privatekey");
-				if (decode) {
-					try {
-						const newService = new super_admin_service_table({
-							serviceName: req.body.servicename,
-							servicePrice: req.body.price,
-							serviceDescription: req.body.description,
-							image: req.file.path,
-							service_category: req.body.service_category,
-							service_time: req.body.service_time,
-						});
+			const decode = jwt.verify(token, "login_jwt_privatekey");
+			if (decode) {
+				const myFile = req.file;
+				const imageUrl = await uploadImage.uploadImage(myFile);
 
-						try {
-							//	console.log(newService);
-							const result = await newService.save();
-							//	console.log(result);
-							return res.status(200).send(result);
-							//	const Salon = await SalonTable.find({ _id: decode.id });
-							// const addservice = await SalonTable.update(
-							// 	{
-							// 		_id: decode.id
-							// 	},
-							// 	{ $push: { ListOfSalonServices: result._id } }
-							// );
-							//	return res.status(200).send(result);
-						} catch (ex) {
-							return res.status(400).send(ex.message);
-						}
+				try {
+					const newService = new super_admin_service_table({
+						serviceName: req.body.servicename,
+						servicePrice: req.body.price,
+						serviceDescription: req.body.description,
+						image: imageUrl,
+						service_category: req.body.service_category,
+						service_time: req.body.service_time,
+					});
+
+					try {
+						//	console.log(newService);
+						const result = await newService.save();
+						//	console.log(result);
+						return res.status(200).send(result);
+						//	const Salon = await SalonTable.find({ _id: decode.id });
+						// const addservice = await SalonTable.update(
+						// 	{
+						// 		_id: decode.id
+						// 	},
+						// 	{ $push: { ListOfSalonServices: result._id } }
+						// );
+						//	return res.status(200).send(result);
 					} catch (ex) {
 						return res.status(400).send(ex.message);
 					}
+				} catch (ex) {
+					return res.status(400).send(ex.message);
 				}
-			} catch (ex) {
-				return res.status(400).send("Invalid token");
 			}
-		} catch (error) {
-			return res.status(400).send(error.message);
-			//console.log(error.message);
+		} catch (ex) {
+			return res.status(400).send("Invalid token");
 		}
+	} catch (error) {
+		return res.status(400).send(error.message);
+		//console.log(error.message);
 	}
-);
+});
 // saloonServicesRouter.post("/", async (req, res) => {
 // 	return res.send("hello world");
 // });
