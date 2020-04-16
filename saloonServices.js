@@ -184,17 +184,15 @@ console.log(req.send("successfuly deleted"));
 })*/
 
 saloonServicesRouter.put("/:id", async (req, res) => {
+	console.log("hello");
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 
 		if (decode) {
-			try {
-				var user2 = await SalonServicesTable.findById(req.params.id);
-			} catch (ex) {
-				return res.status(400).send("Invalid id");
-			}
+			const user2 = await SalonServicesTable.findById(req.params.id);
+			if (!user2) return res.status(400).send("invalid id");
 			const myFile = req.file;
 			const imageUrl = await uploadImage.uploadImage(myFile);
 
@@ -205,12 +203,8 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 				(user2.service_category = req.body.service_category),
 				(user2.service_time = req.body.service_time);
 
-			try {
-				const result = await user2.save();
-				return res.status(200).send(result);
-			} catch (exc) {
-				return res.status(400).send(exc.message);
-			}
+			const result = await user2.save();
+			return res.status(200).send(result);
 		}
 	} catch (ex) {
 		return res.status(400).send(ex.message);

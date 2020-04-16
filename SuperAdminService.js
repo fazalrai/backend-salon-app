@@ -215,6 +215,6 @@ super_admin_service_router.post("/", async (req, res) => {
 // saloonServicesRouter.post("/", async (req, res) => {
 // 	return res.send("hello world");
 // });
-module.exports.super_admin_service_table = super_admin_service_table;
-module.exports.saloonServicesRouter = saloonServicesRouter;
+//module.exports.super_admin_service_table = super_admin_service_table;
+//module.exports.saloonServicesRouter = saloonServicesRouter;
 //module.exports.servce = servce;

@@ -102,17 +102,17 @@ recomended_service_router.delete("/:id", async (req, res) => {
 });
 
 recomended_service_router.put("/:id", async (req, res) => {
+	console.log("id is", req.params.id);
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 
 		if (decode) {
-			try {
-				var user2 = await recomended_service_table.findById(req.params.id);
-			} catch (ex) {
-				return res.status(400).send("Invalid id");
-			}
+			const user2 = await recomended_service_table.findById(req.params.id);
+
+			if (!user2) return res.status(400).send("invalid id");
+
 			const myFile = req.file;
 			const imageUrl = await uploadImage.uploadImage(myFile);
 
@@ -120,15 +120,14 @@ recomended_service_router.put("/:id", async (req, res) => {
 				(user2.servicePrice = req.body.price),
 				(user2.serviceDescription = req.body.description),
 				(user2.image_url = imageUrl),
-				(user2.service_category = req.body.service_category)(
-					(user2.service_time = req.body.service_time)
-				);
+				(user2.service_category = req.body.service_category),
+				(user2.service_time = req.body.service_time);
 
 			try {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (ex) {
