@@ -116,41 +116,38 @@ SalonRouter.post("/", async (req, res) => {
 });
 
 SalonRouter.put("/", async (req, res) => {
+	console.log("put method is called");
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
+
+	const decode = jwt.verify(token, "login_jwt_privatekey");
+	if (!decode) return res.status(400).send("invalid token");
+
 	try {
-		const decode = jwt.verify(token, "login_jwt_privatekey");
-		if (decode) {
-			try {
-				var user2 = await SalonTable.findById(decode.id);
-			} catch (ex) {
-				return res.status(400).send("Invalid id");
-			}
+		var user2 = await SalonTable.findById(decode.id);
 
-			const user = await SalonTable.findOne({
-				SalonOwnerEmail: req.body.email,
-				_id: { $ne: decode.id },
-			});
-			if (user) return res.status(400).send("Email already exist");
-			let user1 = await SalonTable.findOne({
-				SalonOwnerphoneNumber: req.body.phoneNumber,
-				_id: { $ne: decode.id },
-			});
-			if (user1) return res.status(400).send("Phone number already exist");
+		const user = await SalonTable.findOne({
+			SalonOwnerEmail: req.body.email,
+			_id: { $ne: decode.id },
+		});
+		if (user) return res.status(400).send("Email already exist");
+		let user1 = await SalonTable.findOne({
+			SalonOwnerphoneNumber: req.body.phoneNumber,
+			_id: { $ne: decode.id },
+		});
+		if (user1) return res.status(400).send("Phone number already exist");
 
-			(user2.Salon_owner_firstName = req.body.name),
-				(user2.SalonOwnerEmail = req.body.email),
-				(user2.SalonOwnerphoneNumber = req.body.phoneNumber),
-				(user2.SalonOwnerCnic = req.body.cnic),
-				(user2.SalonName = req.body.salonname),
-				(user2.Salon_opening_hours = req.body.Salon_opening_hours),
-				(user2.Salon_closing_hours = req.body.Salon_closing_hours);
-			try {
-				const result = await user2.save();
-				return res.status(200).send(result);
-			} catch (exc) {
-				return res.status(400).send(exc.message);
-			}
+		(user2.Salon_owner_firstName = req.body.name),
+			(user2.SalonOwnerEmail = req.body.email),
+			(user2.SalonOwnerphoneNumber = req.body.phoneNumber),
+			(user2.SalonOwnerCnic = req.body.cnic),
+			(user2.Salon_opening_hours = req.body.Salon_opening_hours),
+			(user2.Salon_closing_hours = req.body.Salon_closing_hours);
+		try {
+			const result = await user2.save();
+			return res.status(200).send(result);
+		} catch (exc) {
+			return res.status(400).send(exc.message);
 		}
 	} catch (exc) {
 		return res.status(400).send(exc.message);
