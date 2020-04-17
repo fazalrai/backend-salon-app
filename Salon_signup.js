@@ -158,30 +158,38 @@ SalonRouter.put("/", async (req, res) => {
 });
 
 SalonRouter.put("/change/password", async (req, res) => {
-	const token = req.header("x-auth-token");
-	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
+
 		const decode = jwt.verify(token, "login_jwt_privatekey");
-		if (decode) {
-			try {
-				var user2 = await SalonTable.findById(decode.id);
-			} catch (ex) {
-				return res.status(400).send("Invalid id");
-			}
-			if (user2.password === req.body.oldpassword) {
-				user2.password = req.body.newpassword;
-				try {
-					const result = await user2.save();
-					return res.status(200).send(result);
-				} catch (exc) {
-					return res.status(400).send(ex.message);
-				}
-			} else {
-				return res.status(400).send("Old Password didnot matched");
-			}
+		if (!decode) return res.status(400).send("invalid token");
+		var user2 = await SalonTable.findById(decode.id);
+		if (!user2) return res.status(400).send("Invalid id");
+		console.log("bodypasword", req.body.oldpassword);
+		const validpassword = await bcrypt.compare(
+			req.body.oldpassword,
+			user2.password
+		);
+		if (!validpassword) return res.status(400).send("invalid old password");
+		const salt = await bcrypt.genSalt(10);
+		try {
+			const new_hased_password = await bcrypt.hash(
+				req.body.confirmpassword,
+				salt
+			);
+			user2.password = new_hased_password;
+		} catch (exc) {
+			return res.status(400).send("can not hash password successfully");
+		}
+		try {
+			const result = await user2.save();
+			return res.status(200).send(result);
+		} catch (exc) {
+			return res.status(400).send(exc.message);
 		}
 	} catch (exc) {
-		return res.status(400).send("Invalid token");
+		return res.status(400).send(exc.message);
 	}
 });
 

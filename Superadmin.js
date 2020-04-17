@@ -15,7 +15,9 @@ const SuperAdminSchema = new monogoes.Schema({
 });
 const SuperAdminTable = monogoes.model("SuperAdminTable", SuperAdminSchema);
 SuperadminRouter.post("/", async (req, res) => {
-	let user = await SuperAdminTable.findOne({ SuperAdminEmail: req.body.email });
+	const user = await SuperAdminTable.findOne({
+		SuperAdminEmail: req.body.email,
+	});
 	//console.log(user);
 	if (user) {
 		return res.status(400).send("email already exist");
@@ -169,33 +171,7 @@ SuperadminRouter.put("/", async (req, res) => {
 			}
 		}
 	} catch (exc) {
-		return res.status(400).send("invalid token");
-	}
-});
-
-SuperadminRouter.put("/update/password", async (req, res) => {
-	const token = req.header("x-auth-token");
-	if (!token) return res.status(401).send("Access denied ,No token provided");
-	try {
-		const decode = jwt.verify(token, "login_jwt_privatekey");
-		if (decode) {
-			try {
-				var user2 = await SuperAdminTable.findById(decode.id);
-			} catch (ex) {
-				return res.status(400).send("Invalid id");
-			}
-
-			user2.password = req.body.password;
-
-			try {
-				const result = await user2.save();
-				return res.status(200).send(result);
-			} catch (exc) {
-				return res.status(400).send(ex.message);
-			}
-		}
-	} catch (exc) {
-		return res.status(400).send("Invalid Token");
+		return res.status(400).send(exc.message);
 	}
 });
 
