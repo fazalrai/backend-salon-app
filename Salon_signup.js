@@ -124,7 +124,15 @@ SalonRouter.put("/", async (req, res) => {
 	if (!decode) return res.status(400).send("invalid token");
 
 	try {
-		var user2 = await SalonTable.findById(decode.id);
+		var user2 = await SalonTable.findById(decode.id).select({
+			Salon_owner_firstName: 1,
+			SalonOwnerEmail: 1,
+			SalonOwnerphoneNumber: 1,
+			SalonOwnerCnic: 1,
+			Salon_opening_hours: 1,
+			Salon_closing_hours: 1,
+			_id: 0,
+		});
 
 		const user = await SalonTable.findOne({
 			SalonOwnerEmail: req.body.email,

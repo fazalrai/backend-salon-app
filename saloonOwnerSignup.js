@@ -12,12 +12,12 @@ const saloonOwnerSchema = new monogoes.Schema({
 		type: String,
 		required: true,
 		minlength: 3,
-		maxlength: 20
+		maxlength: 20,
 	},
 	saloonOwnerEmail: { type: String, required: true, minlength: 5 },
 	saloonOwnerContact: { type: String, required: true, minlength: 7 },
 
-	password: { type: String, required: true, minlength: 8, maxlength: 25 }
+	password: { type: String, required: true, minlength: 8, maxlength: 25 },
 });
 const SalonTable = monogoes.model("SalonTable", saloonOwnerSchema);
 
@@ -60,7 +60,7 @@ saloonOwnerRouter.delete("/:id", async (req, res) => {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
 			const singleemployee = await SalonTable.deleteOne({
-				_id: req.params.id
+				_id: req.params.id,
 			});
 			if (!singleemployee) {
 				res.send("Invalid user id");
@@ -93,11 +93,11 @@ saloonOwnerRouter.put("/:id", async (req, res) => {
 			}
 
 			const user = await SalonTable.findOne({
-				saloonOwnerEmail: req.body.email
+				saloonOwnerEmail: req.body.email,
 			});
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await SalonTable.findOne({
-				saloonOwnerContact: req.body.phnnbr
+				saloonOwnerContact: req.body.phnnbr,
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
@@ -110,7 +110,7 @@ saloonOwnerRouter.put("/:id", async (req, res) => {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (exc) {
@@ -136,7 +136,7 @@ saloonOwnerRouter.post("/", async (req, res) => {
 		saloonOwnerName: req.body.saloonownerName,
 		saloonOwnerEmail: req.body.email,
 		saloonOwnerContact: req.body.phnnbr,
-		password: req.body.password
+		password: req.body.password,
 	});
 
 	try {
@@ -145,10 +145,7 @@ saloonOwnerRouter.post("/", async (req, res) => {
 			{ Salon_Owner_login: true, id: result._id },
 			"login_jwt_privatekey"
 		);
-		return res
-			.status(200)
-			.header("x-auth-token", token)
-			.send(result);
+		return res.status(200).header("x-auth-token", token).send(result);
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
