@@ -39,24 +39,22 @@ const recomended_service_table = monogoes.model(
 	recomended_service_schema
 );
 // To get salon service of particular salon
-recomended_service_router.get(
-	"/",
+recomended_service_router.get("/", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
 
-	async (req, res) => {
-		const token = req.header("x-auth-token");
-		if (!token) return res.status(401).send("Access denied ,No token provided");
-		try {
-			const decode = jwt.verify(token, "login_jwt_privatekey");
-
-			if (decode) {
-				const allservices = await recomended_service_table.find().sort("name");
-				return res.status(200).send(allservices);
-			}
-		} catch (exc) {
-			res.status(400).send("Invalid token");
+		if (decode) {
+			const allservices = await recomended_service_table
+				.find()
+				.sort("service_category");
+			return res.status(200).send(allservices);
 		}
+	} catch (exc) {
+		res.status(400).send("Invalid token");
 	}
-);
+});
 
 recomended_service_router.get("/:id", async (req, res) => {
 	const token = req.header("x-auth-token");

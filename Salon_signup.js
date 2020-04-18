@@ -124,6 +124,8 @@ SalonRouter.put("/", async (req, res) => {
 	if (!decode) return res.status(400).send("invalid token");
 
 	try {
+		//	var user2 = await SalonTable.findById(decode.id);
+
 		var user2 = await SalonTable.findById(decode.id).select({
 			Salon_owner_firstName: 1,
 			SalonOwnerEmail: 1,
@@ -131,15 +133,15 @@ SalonRouter.put("/", async (req, res) => {
 			SalonOwnerCnic: 1,
 			Salon_opening_hours: 1,
 			Salon_closing_hours: 1,
-			_id: 0,
 		});
+		//	return res.status(200).send(req.body);
 
 		const user = await SalonTable.findOne({
 			SalonOwnerEmail: req.body.email,
 			_id: { $ne: decode.id },
 		});
 		if (user) return res.status(400).send("Email already exist");
-		let user1 = await SalonTable.findOne({
+		const user1 = await SalonTable.findOne({
 			SalonOwnerphoneNumber: req.body.phoneNumber,
 			_id: { $ne: decode.id },
 		});
@@ -152,7 +154,9 @@ SalonRouter.put("/", async (req, res) => {
 			(user2.Salon_opening_hours = req.body.Salon_opening_hours),
 			(user2.Salon_closing_hours = req.body.Salon_closing_hours);
 		try {
+			console.log("nefore");
 			const result = await user2.save();
+			console.log(result);
 			return res.status(200).send(result);
 		} catch (exc) {
 			return res.status(400).send(exc.message);
@@ -254,6 +258,30 @@ SalonRouter.put("/add_new_password", async (req, res) => {
 function random(low, high) {
 	return Math.random() * (high - low) + low;
 }
+
+SalonRouter.get("/getSingle", async (req, res) => {
+	const token = req.header("x-auth-token");
+	if (!token) return res.status(401).send("Access denied ,No token provided");
+	try {
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			const salon = await SalonTable.findOne({ _id: decode.id }).select({
+				Salon_owner_firstName: 1,
+				SalonOwnerEmail: 1,
+				SalonOwnerphoneNumber: 1,
+				SalonOwnerCnic: 1,
+				Salon_opening_hours: 1,
+				Salon_closing_hours: 1,
+			});
+
+			if (!salon) return res.status(400).send("Salon wit given id not found");
+
+			return res.status(200).send(salon);
+		}
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
+});
 
 SalonRouter.get("/", async (req, res) => {
 	const token = req.header("x-auth-token");
