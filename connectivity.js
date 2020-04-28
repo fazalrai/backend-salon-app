@@ -8,7 +8,7 @@ const connectDB = async () => {
 				useNewUrlParser: true,
 				useCreateIndex: true,
 				useFindAndModify: false,
-				useUnifiedTopology: true
+				useUnifiedTopology: true,
 			}
 			//	{ reconnectTries: 30, reconnectInterval: 1000 }
 		);

@@ -193,13 +193,12 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 		if (decode) {
 			const user2 = await SalonServicesTable.findById(req.params.id);
 			if (!user2) return res.status(400).send("invalid id");
-			const myFile = req.file;
-			const imageUrl = await uploadImage.uploadImage(myFile);
-
+			// const myFile = req.file;
+			// const imageUrl = await uploadImage.uploadImage(myFile);
 			(user2.serviceName = req.body.servicename),
 				(user2.servicePrice = req.body.price),
 				(user2.serviceDescription = req.body.description),
-				(user2.image_url = imageUrl),
+				(user2.image_url = req.body.image),
 				(user2.service_category = req.body.service_category),
 				(user2.service_time = req.body.service_time);
 
@@ -212,12 +211,35 @@ saloonServicesRouter.put("/:id", async (req, res) => {
 	//	(user2.phoneNumber = req.body.phnnbr);
 });
 //upload.single("image"), function to be called if u want to store images locaaly
+saloonServicesRouter.post("/recomended/service", async (req, res) => {
+	console.log("hello", req.body);
+	try {
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			try {
+				const newService = new SalonServicesTable({
+					serviceName: req.body.servicename,
+					servicePrice: req.body.price,
+					serviceDescription: req.body.description,
+					image_url: req.body.image,
+					service_category: req.body.service_category,
+					Salon_id: decode.id,
+					service_time: req.body.service_time,
+				});
+				const result = await newService.save();
+				return res.status(200).send(result);
+			} catch (error) {
+				return res.status(400).send(error.message);
+			}
+		}
+	} catch (error) {
+		return res.status(400).send(error.message);
+	}
+});
 saloonServicesRouter.post("/", async (req, res) => {
 	try {
-		//console.log("hello");
-		//	console.log("eader is ", req.header("x-auth-token"));
-		//	console.log(req.headers);
-		//	console.log(req.headers("x-auth-token"));
 		const token = req.header("x-auth-token");
 		if (!token) return res.status(401).send("Access denied ,No token provided");
 		const decode = jwt.verify(token, "login_jwt_privatekey");
