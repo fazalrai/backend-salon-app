@@ -10,13 +10,13 @@ const userSchema = new monogoes.Schema({
 	UserName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	UserEmail: { type: String, required: true },
 	password: { type: String, required: true, minlength: 8, maxlength: 125 },
-	phoneNumber: { type: Number, required: true, minlength: 10, maxlength: 15 }
+	phoneNumber: { type: Number, required: true, minlength: 10, maxlength: 15 },
 });
 
 const ttl_schema = new monogoes.Schema({
 	UserEmail: { type: String, required: true },
 	createdAt: { type: Date, required: true },
-	token: { type: Number, required: true }
+	token: { type: Number, required: true },
 });
 
 const ttl_table = monogoes.model("ttl_table", ttl_schema);
@@ -37,12 +37,12 @@ Userrouter.put("/", async (req, res) => {
 
 			const user = await UserTable.findOne({
 				UserEmail: req.body.email,
-				_id: { $ne: decode.id }
+				_id: { $ne: decode.id },
 			});
 			if (user) return res.status(400).send("Email already exist");
 			let user1 = await UserTable.findOne({
 				phoneNumber: req.body.phnnbr,
-				_id: { $ne: decode.id }
+				_id: { $ne: decode.id },
 			});
 			if (user1) return res.status(400).send("Phone number already exist");
 
@@ -55,7 +55,7 @@ Userrouter.put("/", async (req, res) => {
 				const result = await user2.save();
 				return res.status(200).send(result);
 			} catch (exc) {
-				return res.status(400).send(ex.message);
+				return res.status(400).send(exc.message);
 			}
 		}
 	} catch (exc) {
@@ -96,7 +96,7 @@ Userrouter.post("/", async (req, res) => {
 		UserName: req.body.name,
 		UserEmail: req.body.email,
 		password: req.body.password,
-		phoneNumber: req.body.phnnbr
+		phoneNumber: req.body.phnnbr,
 	});
 
 	const salt = await bcrypt.genSalt(10);
@@ -164,18 +164,18 @@ Userrouter.post("/forgot/password", async (req, res) => {
 
 		auth: {
 			user: "fa16-bcs-347@cuilahore.edu.pk",
-			pass: "pmlnpmln1234"
-		}
+			pass: "pmlnpmln1234",
+		},
 	});
 
 	let mailOptions = {
 		from: "fa16-bcs-347@cuilahore.edu.pk",
 		to: req.body.email,
 		subject: "Verfication Code",
-		text: Math.floor(random(10000, 100000)).toString()
+		text: Math.floor(random(10000, 100000)).toString(),
 	};
 
-	transporter.sendMail(mailOptions, function(err, info) {
+	transporter.sendMail(mailOptions, function (err, info) {
 		if (err) {
 			return res.status(400).send(err);
 		}
@@ -184,7 +184,7 @@ Userrouter.post("/forgot/password", async (req, res) => {
 	const new_token = new ttl_table({
 		createdAt: new Date(),
 		user_email: req.body.email,
-		token: parseInt(mailOptions.text)
+		token: parseInt(mailOptions.text),
 	});
 
 	const already_token = await ttl_table
