@@ -5,7 +5,6 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Userrouter = express.Router();
-var name;
 const userSchema = new monogoes.Schema({
 	UserName: { type: String, required: true, minlength: 3, maxlength: 20 },
 	UserEmail: { type: String, required: true },
@@ -210,11 +209,13 @@ function random(low, high) {
 	return Math.random() * (high - low) + low;
 }
 Userrouter.post("/verify_code/and/update_password", async (req, res) => {
+	//	const to_check_table_exist = ttl_table.find();
+
 	const result = await ttl_table.findOne({ token: req.body.token });
-	const user = await UserTable.findOne({ UserEmail: token.UserEmail });
+	const user = await UserTable.findOne({ UserEmail: result.UserEmail });
 
 	const salt = await bcrypt.genSalt(10);
-	user.password = await bcrypt.hash(result.confirmpassword, salt);
+	user.password = await bcrypt.hash(req.body.confirmpassword, salt);
 	const save_password = await user.save();
 	if (result) {
 		return res.status(200).send(save_password);
