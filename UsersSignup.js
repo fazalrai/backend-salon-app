@@ -183,27 +183,26 @@ Userrouter.post("/forgot/password", async (req, res) => {
 
 	const new_token = new ttl_table({
 		createdAt: new Date(),
-		user_email: req.body.email,
+		UserEmail: req.body.email,
 		token: parseInt(mailOptions.text),
 	});
 
-	const already_token = await ttl_table
-		.findOne({ user_email: req.body.email })
-		.select({ token });
+	// const already_token = await ttl_table
+	// 	.findOne({ user_email: req.body.email })
+	// 	.select({ token });
 
-	if (already_token) {
-		already_token.token = new_token.token;
-		try {
-			let save_token = await already_token.save();
-			return res.status(200).send("token sent successfully", save_token);
-		} catch (exc) {}
-	} else {
-		try {
-			let save_token = await new_token.save();
-			return res.status(200).send("token sent successfully", save_token);
-		} catch (exc) {
-			return res.status(400).send(exc.message);
-		}
+	// if (already_token) {
+	// 	already_token.token = new_token.token;
+	// 	try {
+	// 		let save_token = await already_token.save();
+	// 		return res.status(200).send("token sent successfully", save_token);
+	// 	} catch (exc) {}
+	// } else {
+	try {
+		const save_token = await new_token.save();
+		return res.status(200).send(save_token);
+	} catch (exc) {
+		return res.status(400).send(exc.message);
 	}
 });
 
@@ -212,8 +211,13 @@ function random(low, high) {
 }
 Userrouter.post("/verify_code/and/update_password", async (req, res) => {
 	const result = await ttl_table.findOne({ token: req.body.token });
+	const user = await UserTable.findOne({ UserEmail: token.UserEmail });
+
+	const salt = await bcrypt.genSalt(10);
+	user.password = await bcrypt.hash(result.confirmpassword, salt);
+	const save_password = await user.save();
 	if (result) {
-		return res.status(200).send(result);
+		return res.status(200).send(save_password);
 	} else {
 		return res.status(400).send("Invalid code");
 	}
