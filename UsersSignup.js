@@ -10,6 +10,10 @@ const userSchema = new monogoes.Schema({
 	UserEmail: { type: String, required: true },
 	password: { type: String, required: true, minlength: 8, maxlength: 125 },
 	phoneNumber: { type: Number, required: true, minlength: 10, maxlength: 15 },
+	Account_verfied: {
+		type: Boolean,
+		required: true,
+	},
 });
 
 const ttl_schema = new monogoes.Schema({
@@ -76,46 +80,80 @@ Userrouter.get("/", async (req, res) => {
 	}
 });
 Userrouter.post("/", async (req, res) => {
-	let user = await UserTable.findOne({ UserEmail: req.body.email });
-	//console.log(user);
+	const user = await UserTable.findOne({ UserEmail: req.body.email });
 	if (user) {
 		return res.status(400).send("email already exist");
 	}
-	let user1 = await UserTable.findOne({ phoneNumber: req.body.phnnbr });
-	//	console.log(user1);
+	const user1 = await UserTable.findOne({ phoneNumber: req.body.phnnbr });
 	if (user1) {
 		return res.status(400).send("Phone number already exist");
 	}
-	//else {
-	//		res.send("valid phnnbr");
-	//}
-	//console.log(req.body);
 
 	const newuser = new UserTable({
 		UserName: req.body.name,
 		UserEmail: req.body.email,
 		password: req.body.password,
 		phoneNumber: req.body.phnnbr,
+		Account_verfied: false,
 	});
 
 	const salt = await bcrypt.genSalt(10);
 	newuser.password = await bcrypt.hash(newuser.password, salt);
 	try {
-		const result = await newuser.save();
-		const token = jwt.sign(
-			{ login: true, id: result._id },
-			"login_jwt_privatekey"
-		);
+		let transporter = nodemailer.createTransport({
+			service: "Gmail",
+			//port: 587,
+			secure: false,
 
-		return res
-			.status(200)
-			.header("x-auth-token", token)
-			.send("token suucessfully sent");
+			auth: {
+				user: "fa16-bcs-347@cuilahore.edu.pk",
+				pass: "pmlnpmln1234",
+			},
+		});
+
+		let mailOptions = {
+			from: "fa16-bcs-347@cuilahore.edu.pk",
+			to: req.body.email,
+			subject: "Verfication Code",
+			text: Math.floor(random(10000, 100000)).toString(),
+		};
+
+		transporter.sendMail(mailOptions, function (err, info) {
+			if (err) {
+				return res.status(400).send(err);
+			}
+		});
+
+		const new_token = new ttl_table({
+			createdAt: new Date(),
+			UserEmail: req.body.email,
+			token: parseInt(mailOptions.text),
+		});
+		const save_token = await new_token.save();
+
+		const result = await newuser.save();
+
+		return res.status(200).send("token suucessfully sent");
 	} catch (ex) {
 		return res.status(400).send(ex.message);
 	}
 });
 
+Userrouter.post("/verify/account/token", async (req, res) => {
+	try {
+		const result = await ttl_table.findOne({ token: req.body.token });
+		const user = await UserTable.findOne({ UserEmail: result.UserEmail });
+		user.Account_verfied = true;
+		const result = await user.save();
+		const token = jwt.sign({ id: result._id }, "login_jwt_privatekey");
+		res
+			.header("x-auth-token", token)
+			.status(200)
+			.send("token verfied successfully ");
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
+});
 Userrouter.put("/change/password", async (req, res) => {
 	try {
 		const token = req.header("x-auth-token");

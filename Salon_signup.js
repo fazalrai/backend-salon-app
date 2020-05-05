@@ -96,12 +96,9 @@ SalonRouter.post("/", async (req, res) => {
 						{ newSalon_account: true, id: result._id },
 						"login_jwt_privatekey"
 					);
-					return (
-						res
-							//	.header("x-auth-token", token)
-							.status(200)
-							.send("Request submitted sucessfully wait for verification")
-					);
+					return res
+						.status(200)
+						.send("Request submitted sucessfully wait for verification");
 				})
 
 				.catch((error) => {
