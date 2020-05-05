@@ -144,8 +144,8 @@ Userrouter.post("/verify/account/token", async (req, res) => {
 		const result = await ttl_table.findOne({ token: req.body.token });
 		const user = await UserTable.findOne({ UserEmail: result.UserEmail });
 		user.Account_verfied = true;
-		const result = await user.save();
-		const token = jwt.sign({ id: result._id }, "login_jwt_privatekey");
+		const results = await user.save();
+		const token = jwt.sign({ id: results._id }, "login_jwt_privatekey");
 		res
 			.header("x-auth-token", token)
 			.status(200)
