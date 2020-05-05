@@ -6,10 +6,11 @@ const User_login_router = express.Router();
 User_login_router.post("/", async (req, res) => {
 	try {
 		const user = await UserTable.findOne({
-			UserEmail: req.body.email
+			UserEmail: req.body.email,
+			Account_verfied = true
 		});
 
-		if (!user) return res.status(400).send("Invalid email");
+		if (!user) return res.status(400).send("Invalid email or accoutn doesn't exist");
 
 		const validpassword = await bcrypt.compare(
 			req.body.password,
