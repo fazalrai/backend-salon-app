@@ -157,6 +157,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 						ending_time: end_time,
 						service_status: "onqueue",
 					});
+
 					try {
 						const result = await appointment.save();
 						return res.status(200).send(result);
