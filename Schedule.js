@@ -128,14 +128,14 @@ ScheduleRouter.post("/", async (req, res) => {
 				let salon_name = await SalonTable.findById({
 					_id: appointment[i].Salon_id,
 				}).select({ SalonName: 1, _id: 0 });
-				// let servicename = await SalonServicesTable.findOne({
-				// 	_id: appointment[i].service_id,
-				// }).select({ serviceName: 1, _id: 0 });
+				let servicename = await SalonServicesTable.findOne({
+					_id: appointment[i].service_id,
+				}).select({ serviceName: 1, _id: 0 });
 
-				console.log("salon name", salon_name);
+				//console.log("salon name", salon_name);
 				//	console.log("service name", servicename);
-				// appointment.Salon_id = salon_name["SalonName"];
-				// appointment.service_id = servicename["serviceName"];
+				appointment[i].Salon_id = salon_name["SalonName"];
+				appointment[i].service_id = servicename["serviceName"];
 
 				//	console.log("after", appointment);
 			}

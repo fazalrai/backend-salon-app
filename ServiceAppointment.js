@@ -150,7 +150,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 					let end_time = start_time2.add(Salon_id.service_time, "minutes");
 					const appointment = new ServiceAppointmentTable({
 						customer_id: decode.id,
-						service_id: req.body.serviceid,
+						service_id: req.params.id,
 						Salon_id: Salon_id.Salon_id,
 						booking_date: req.body.booking_date,
 						stating_time: start_time,
