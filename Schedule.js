@@ -135,7 +135,7 @@ ScheduleRouter.post("/", async (req, res) => {
 				//console.log("salon name", salon_name);
 				//	console.log("service name", servicename);
 				appointment[i].Salon_id = salon_name["SalonName"];
-				appointment[i].service_id = servicename["serviceName"];
+				//appointment[i].service_id = servicename["serviceName"];
 
 				//	console.log("after", appointment);
 			}
