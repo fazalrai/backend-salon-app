@@ -2,7 +2,7 @@ const monogoes = require("mongoose");
 const path = require("path");
 const { Storage } = require("@google-cloud/storage");
 const multer = require("multer");
-
+const { Report_router } = require("./reports");
 const express = require("express");
 const bodyparser = require("body-parser");
 const UserSignup_router = require("./UsersSignup");
@@ -132,6 +132,7 @@ app.use(
 	"/Digital_Saloon.com/api/recomended_nearest_salon",
 	customer_recomendation_for_nearest_salon_router
 );
+app.use("/Digital_Saloon.com/api/reports", Report_router);
 bucket.getFiles().then(function (data) {
 	const files = data[0];
 	//console.log("files are", files);

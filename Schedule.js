@@ -69,6 +69,7 @@ ScheduleRouter.get("/", async (req, res) => {
 				const rzlt = all_Onqueue_services.map((obj) => {
 					return obj["service_id"];
 				});
+
 				//	const rs = Object.keys(all_Onqueue_services).map(key => {
 				//		return all_Onqueue_services[key];
 				//	});
@@ -120,11 +121,19 @@ ScheduleRouter.post("/", async (req, res) => {
 			const only_date = moment(req.body.current_date).format("YYYY-MM-DD");
 			console.log(only_date);
 			const appointment = await ServiceAppointmentTable.find({
-				booking_date: { $gte: only_date }, //gte
+				booking_date: { $gte: only_date },
+				customer_id: decode.id,
+				//gte
 			}).sort({ booking_date: 1 });
 			if (!appointment) res.status(400).send("no appintment exist");
-			console.log("appoitnment is", appointment);
+			//console.log("appoitnment is", appointment);
 			for (let i = 0; i < appointment.length; i++) {
+				// const f = moment(appointment[i].stating_time, "h:mm A");
+				// console.log("f is ", f);
+				// // appointment[i].ending_time = moment(
+				// 	appointment[i].ending_time,
+				// 	"h:mm A"
+				// );
 				let salon_name = await SalonTable.findById({
 					_id: appointment[i].Salon_id,
 				}).select({ SalonName: 1, _id: 0 });
@@ -135,7 +144,7 @@ ScheduleRouter.post("/", async (req, res) => {
 				//console.log("salon name", salon_name);
 				//	console.log("service name", servicename);
 				appointment[i].Salon_id = salon_name["SalonName"];
-				//appointment[i].service_id = servicename["serviceName"];
+				appointment[i].service_id = servicename["serviceName"];
 
 				//	console.log("after", appointment);
 			}

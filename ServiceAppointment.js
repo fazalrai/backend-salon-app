@@ -194,12 +194,13 @@ ServiceAppointmentRouter.delete("/:id", async (req, res) => {
 			});
 			console.log("service is ", service);
 			const result = await service.remove();
-			return res.status(200).send("Service deleted successfuuly");
+			return res.status(200).send("appointment cancelled successfuuly");
 		}
 	} catch (exc) {
 		return res.status(400).send(exc.message);
 	}
 });
+
 // let format = "hh:mm A";
 // let start_time1 = moment(req.body.stating_time, format);
 // let start_time3 = moment(req.body.stating_time, format);
