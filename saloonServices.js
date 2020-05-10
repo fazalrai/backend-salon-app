@@ -167,9 +167,10 @@ saloonServicesRouter.delete("/:id", async (req, res) => {
 			try {
 				const service = await SalonServicesTable.findOne({
 					_id: req.params.id,
+					Salon_id: decode.id,
 				});
 
-				const r1 = await result.remove();
+				const r1 = await service.remove();
 				return res.status(200).send("Service deleted successfuuly");
 			} catch (exc) {
 				return res.status(400).send("invalid id");
