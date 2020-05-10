@@ -59,6 +59,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 
 			const Salon_id = await SalonServicesTable.findOne({
 				_id: req.params.id,
+				Salon_id: decode.id,
 			}).select({ Salon_id: 1, service_time: 1, _id: 0 });
 
 			const Salon_timings = await SalonTable.findOne({
