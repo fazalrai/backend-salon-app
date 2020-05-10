@@ -19,7 +19,16 @@ Report_router.get("/", async (req, res) => {
 						count: { $sum: 1 },
 					},
 				},
+
+				{
+					$sort: { _id: 1 },
+				},
 			]);
+			// const result = await ServiceAppointmentTable.find({
+			// 	Salon_id: decode.id,
+			// }).sort({
+			// 	booking_date: 1,
+			// });
 			console.log("result is", result);
 			// .count()
 			// .sort({ booking_date: 1 })
