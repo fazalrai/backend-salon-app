@@ -126,8 +126,7 @@ SuperadminRouter.get("/:id", async (req, res) => {
 				from: "fa16-bcs-347@cuilahore.edu.pk",
 				to: salon.SalonOwnerEmail,
 				subject: "Account verfication",
-				text:
-					"Your account has been vaerified successfully.Click the given below link to proceed login",
+				text: "http://localhost:3000/calender",
 			};
 
 			transporter.sendMail(mailOptions, function (err, info) {

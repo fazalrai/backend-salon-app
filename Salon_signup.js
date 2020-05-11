@@ -244,16 +244,23 @@ SalonRouter.post("/forgot/password", async (req, res) => {
 });
 
 SalonRouter.post("/verify_code/and/update_password", async (req, res) => {
-	const result = await ttl_table.findOne({ token: req.body.token });
-	const user = await SalonTable.findOne({ SalonOwnerEmail: result.UserEmail });
+	console.log("helll");
+	try {
+		const result = await ttl_table.findOne({ token: req.body.token });
+		const user = await SalonTable.findOne({
+			SalonOwnerEmail: result.UserEmail,
+		});
 
-	const salt = await bcrypt.genSalt(10);
-	user.password = await bcrypt.hash(req.body.confirmpassword, salt);
-	const save_password = await user.save();
-	if (result) {
-		return res.status(200).send(save_password);
-	} else {
-		return res.status(400).send("Invalid code");
+		const salt = await bcrypt.genSalt(10);
+		user.password = await bcrypt.hash(req.body.confirmpassword, salt);
+		const save_password = await user.save();
+		if (result) {
+			return res.status(200).send(save_password);
+		} else {
+			return res.status(400).send("Invalid code");
+		}
+	} catch (exc) {
+		return res.status(400).send(exc.message);
 	}
 });
 
