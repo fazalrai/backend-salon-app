@@ -106,13 +106,13 @@ Userrouter.post("/", async (req, res) => {
 			secure: false,
 
 			auth: {
-				user: "digitalsalonsystem.pk456@gmail.com",
-				pass: "pmlnpmln",
+				user: "fa16-bcs-347@cuilahore.edu.pk",
+				pass: "pmlnpmln1234",
 			},
 		});
 
 		let mailOptions = {
-			from: "digitalsalonsystem.pk456@gmail.com",
+			from: "fa16-bcs-347@cuilahore.edu.pk",
 			to: req.body.email,
 			subject: "Verfication Code",
 			text: Math.floor(random(10000, 100000)).toString(),
@@ -200,13 +200,13 @@ Userrouter.post("/forgot/password", async (req, res) => {
 		secure: false,
 
 		auth: {
-			user: "digitalsalonsystem.pk456@gmail.com",
-			pass: "pmlnpmln",
+			user: "fa16-bcs-347@cuilahore.edu.pk",
+			pass: "pmlnpmln1234",
 		},
 	});
 
 	let mailOptions = {
-		from: "digitalsalonsystem.pk456@gmail.com",
+		from: "fa16-bcs-347@cuilahore.edu.pk",
 		to: req.body.email,
 		subject: "Verfication Code",
 		text: Math.floor(random(10000, 100000)).toString(),
@@ -309,4 +309,5 @@ Userrouter.post("/forgot/pasord", async (req, res) => {
 
 module.exports.Userrouter = Userrouter;
 module.exports.UserTable = UserTable;
+module.exports.ttl_table = ttl_table;
 //module.exports.Creatuser = Creatuser;

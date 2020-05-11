@@ -3,6 +3,8 @@ const express = require("express");
 const SalonRouter = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const { ttl_table } = require("./UsersSignup");
 const SalonSchema = new monogoes.Schema({
 	Salon_owner_firstName: {
 		type: String,
@@ -209,13 +211,13 @@ SalonRouter.post("/forgot/password", async (req, res) => {
 		secure: false,
 
 		auth: {
-			user: "digitalsalonsystem.pk456@gmail.com",
-			pass: "pmlnpmln",
+			user: "fa16-bcs-347@cuilahore.edu.pk",
+			pass: "pmlnpmln1234",
 		},
 	});
 
 	let mailOptions = {
-		from: "digitalsalonsystem.pk456@gmail.com",
+		from: "fa16-bcs-347@cuilahore.edu.pk",
 		to: req.body.email,
 		subject: "Verfication Code",
 		text: Math.floor(random(10000, 100000)).toString(),
