@@ -72,13 +72,13 @@ SuperadminRouter.delete("/:id", async (req, res) => {
 				secure: false,
 
 				auth: {
-					user: "fa16-bcs-347@cuilahore.edu.pk",
-					pass: "pmlnpmln1234",
+					user: "digitalsalonsystem.pk456@gmail.com",
+					pass: "pmlnpmln",
 				},
 			});
 
 			let mailOptions = {
-				from: "fa16-bcs-347@cuilahore.edu.pk",
+				from: "digitalsalonsystem.pk456@gmail.com",
 				to: result.SalonOwnerEmail,
 				subject: "Account verfication",
 				text: "Your account can not been verified due to some reasons",
@@ -117,13 +117,13 @@ SuperadminRouter.get("/:id", async (req, res) => {
 				secure: false,
 
 				auth: {
-					user: "fa16-bcs-347@cuilahore.edu.pk",
-					pass: "pmlnpmln1234",
+					user: "digitalsalonsystem.pk456@gmail.com",
+					pass: "pmlnpmln",
 				},
 			});
 
 			let mailOptions = {
-				from: "fa16-bcs-347@cuilahore.edu.pk",
+				from: "digitalsalonsystem.pk456@gmail.com",
 				to: salon.SalonOwnerEmail,
 				subject: "Account verfication",
 				text:

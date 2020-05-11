@@ -8,7 +8,7 @@ SalonOwner_login_router.post("/", async (req, res) => {
 	//	console.log(req.body);
 	try {
 		const user = await SalonTable.findOne({
-			SalonOwnerEmail: req.body.email
+			SalonOwnerEmail: req.body.email,
 		});
 		//	console.log("user is ", user);
 
@@ -20,7 +20,7 @@ SalonOwner_login_router.post("/", async (req, res) => {
 
 		if (!validpassword) return res.status(400).send("invalid password");
 		if (user.Account_verfied) {
-			const token = await jwt.sign(
+			const token = jwt.sign(
 				{ Salon_Owner_login: true, id: user._id },
 				"login_jwt_privatekey"
 			);

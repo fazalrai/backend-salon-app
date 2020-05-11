@@ -200,61 +200,60 @@ SalonRouter.put("/change/password", async (req, res) => {
 });
 
 SalonRouter.post("/forgot/password", async (req, res) => {
-	name = SalonTable.findOne({ SalonOwnerphoneNumber: req.body.phnnbr });
-	if (name) {
-		const customerId = "9F66B2BC-623D-4351-8687-884B5A723C92";
-		const apiKey =
-			"xNJ8n/FtprpI6XcPcz/4oWBy3wlaGh9na/4xEMtNlqitYaAKnEf5JSqbCh6oPaBE0yaxOOAKX6bmPg6cqaMeaQ==";
-		const rest_endpoint = "https://rest-api.telesign.com";
-		const timeout = 10 * 1000; // 10 secs
+	const name = await SalonTable.findOne({ SalonOwnerEmail: req.body.email });
+	if (!name) return res.status(400).send("invalid email");
 
-		const client = new TeleSignSDK(
-			customerId,
-			apiKey,
-			rest_endpoint,
-			timeout // optional
-			// userAgent
-		);
+	let transporter = nodemailer.createTransport({
+		service: "Gmail",
+		//port: 587,
+		secure: false,
 
-		const phoneNumber = req.body.phnnbr; //req.body.phnnbr;
-		digit = Math.floor(random(1000, 10000));
-		const messageType = "ARN";
+		auth: {
+			user: "digitalsalonsystem.pk456@gmail.com",
+			pass: "pmlnpmln",
+		},
+	});
 
-		//console.log("## MessagingClient.message ##");
+	let mailOptions = {
+		from: "digitalsalonsystem.pk456@gmail.com",
+		to: req.body.email,
+		subject: "Verfication Code",
+		text: Math.floor(random(10000, 100000)).toString(),
+	};
 
-		function messageCallback(error, responseBody) {
-			if (error === null) {
-				//console.log(
-				//	`Messaging response for messaging phone number: ${phoneNumber}` +
-				//		` => code: ${responseBody["status"]["code"]}` +
-				//		`, description: ${responseBody["status"]["description"]}`
-				//);
-				return res
-					.status(200)
-					.send("enter the verfication code send to your number");
-			} else {
-				return res.status(400).send(error);
-				//console.error("Unable to send message. " + error);
-			}
+	transporter.sendMail(mailOptions, function (err, info) {
+		if (err) {
+			return res.status(400).send(err);
 		}
-		client.sms.message(messageCallback, phoneNumber, message, messageType);
-	} else {
-		return res.status(400).send("Invalid phnnbr");
-	}
-});
-SalonRouter.put("/add_new_password", async (req, res) => {
-	name.password = req.body.password;
+	});
+
+	const new_token = new ttl_table({
+		createdAt: new Date(),
+		UserEmail: req.body.email,
+		token: parseInt(mailOptions.text),
+	});
+
 	try {
-		const result = await name.save();
-		return res.status(200).send(result);
+		const save_token = await new_token.save();
+		return res.status(200).send(save_token);
 	} catch (exc) {
-		return res.status(400).send(ex.message);
+		return res.status(400).send(exc.message);
 	}
 });
 
-function random(low, high) {
-	return Math.random() * (high - low) + low;
-}
+SalonRouter.post("/verify_code/and/update_password", async (req, res) => {
+	const result = await ttl_table.findOne({ token: req.body.token });
+	const user = await SalonTable.findOne({ SalonOwnerEmail: result.UserEmail });
+
+	const salt = await bcrypt.genSalt(10);
+	user.password = await bcrypt.hash(req.body.confirmpassword, salt);
+	const save_password = await user.save();
+	if (result) {
+		return res.status(200).send(save_password);
+	} else {
+		return res.status(400).send("Invalid code");
+	}
+});
 
 SalonRouter.get("/getSingle", async (req, res) => {
 	const token = req.header("x-auth-token");
@@ -303,6 +302,8 @@ SalonRouter.get("/", async (req, res) => {
 		return res.status(400).send(exc.message);
 	}
 });
-
+function random(low, high) {
+	return Math.random() * (high - low) + low;
+}
 module.exports.SalonRouter = SalonRouter;
 module.exports.SalonTable = SalonTable;

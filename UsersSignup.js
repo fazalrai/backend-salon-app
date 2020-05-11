@@ -106,13 +106,13 @@ Userrouter.post("/", async (req, res) => {
 			secure: false,
 
 			auth: {
-				user: "fa16-bcs-347@cuilahore.edu.pk",
-				pass: "pmlnpmln1234",
+				user: "digitalsalonsystem.pk456@gmail.com",
+				pass: "pmlnpmln",
 			},
 		});
 
 		let mailOptions = {
-			from: "fa16-bcs-347@cuilahore.edu.pk",
+			from: "digitalsalonsystem.pk456@gmail.com",
 			to: req.body.email,
 			subject: "Verfication Code",
 			text: Math.floor(random(10000, 100000)).toString(),
@@ -200,13 +200,13 @@ Userrouter.post("/forgot/password", async (req, res) => {
 		secure: false,
 
 		auth: {
-			user: "fa16-bcs-347@cuilahore.edu.pk",
-			pass: "pmlnpmln1234",
+			user: "digitalsalonsystem.pk456@gmail.com",
+			pass: "pmlnpmln",
 		},
 	});
 
 	let mailOptions = {
-		from: "fa16-bcs-347@cuilahore.edu.pk",
+		from: "digitalsalonsystem.pk456@gmail.com",
 		to: req.body.email,
 		subject: "Verfication Code",
 		text: Math.floor(random(10000, 100000)).toString(),
