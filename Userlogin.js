@@ -20,7 +20,7 @@ User_login_router.post("/", async (req, res) => {
 		//return res.status(400).send(validpassword);
 		if (!validpassword) return res.status(400).send("invalid password");
 
-		const token = await jwt.sign(
+		const token = jwt.sign(
 			{ login: true, id: user._id },
 			"login_jwt_privatekey"
 		);

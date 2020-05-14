@@ -72,7 +72,12 @@ Userrouter.get("/", async (req, res) => {
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
 		if (decode) {
-			let users = await UserTable.find();
+			const users = await UserTable.find({ _id: decode.id }).select({
+				UserName: 1,
+				UserEmail: 1,
+				phoneNumber: 1,
+				_id: 0,
+			});
 			return res.status(200).send(users);
 		}
 	} catch (exc) {
