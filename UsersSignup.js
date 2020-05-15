@@ -85,15 +85,22 @@ Userrouter.get("/", async (req, res) => {
 	}
 });
 Userrouter.post("/", async (req, res) => {
-	const user = await UserTable.findOne({ UserEmail: req.body.email });
+	const user = await UserTable.findOne({
+		UserEmail: req.body.email,
+		Account_verfied: true,
+	});
 	if (user) {
 		return res.status(400).send("email already exist");
 	}
+
 	const user1 = await UserTable.findOne({ phoneNumber: req.body.phnnbr });
 	if (user1) {
 		return res.status(400).send("Phone number already exist");
 	}
-
+	// const user3 = await UserTable.findOne({
+	// 	UserEmail: req.body.email,
+	// 	Account_verfied: false,
+	// });
 	const newuser = new UserTable({
 		UserName: req.body.name,
 		UserEmail: req.body.email,

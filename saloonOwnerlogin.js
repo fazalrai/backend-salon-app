@@ -9,6 +9,7 @@ SalonOwner_login_router.post("/", async (req, res) => {
 	try {
 		const user = await SalonTable.findOne({
 			SalonOwnerEmail: req.body.email,
+			Account_verfied: true,
 		});
 		//	console.log("user is ", user);
 

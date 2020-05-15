@@ -244,7 +244,6 @@ SalonRouter.post("/forgot/password", async (req, res) => {
 });
 
 SalonRouter.post("/verify_code/and/update_password", async (req, res) => {
-	console.log("helll");
 	try {
 		const result = await ttl_table.findOne({ token: req.body.token });
 		const user = await SalonTable.findOne({

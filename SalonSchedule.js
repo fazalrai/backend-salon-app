@@ -3,6 +3,7 @@ const express = require("express");
 //var moment = require("moment");
 const Moment = require("moment");
 const MomentRange = require("moment-range");
+const { SalonServicesTable } = require("./saloonServices");
 
 const moment = MomentRange.extendMoment(Moment);
 const jwt = require("jsonwebtoken");
@@ -23,10 +24,17 @@ Salon_Schedule_router.get("/:id", async (req, res) => {
 				booking_date: date,
 				Salon_id: decode.id,
 			});
+
 			console.log("result is ", result);
 			if (result.length == 0) {
 				return res.status(200).send("No appointment's today");
 			} else {
+				for (let i = 0; i < result.length; i++) {
+					let servicename = await SalonServicesTable.findOne({
+						_id: result[i].service_id,
+					}).select({ serviceName: 1, _id: 0 });
+					result[i].service_id = servicename["serviceName"];
+				}
 				console.log("result is", result);
 				return res.status(200).send(result);
 			}
