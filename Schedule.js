@@ -134,6 +134,13 @@ ScheduleRouter.post("/", async (req, res) => {
 				// 	appointment[i].ending_time,
 				// 	"h:mm A"
 				// );
+				let starting_time = appointment[i].stating_time;
+				let ending = appointment[i].ending_time;
+				starting_time = moment(starting_time).format("HH:mm");
+				ending = moment(ending).format("HH:mm");
+				result[i].stating_time = starting_time;
+
+				result[i].ending_time = ending;
 				let salon_name = await SalonTable.findById({
 					_id: appointment[i].Salon_id,
 				}).select({ SalonName: 1, _id: 0 });
