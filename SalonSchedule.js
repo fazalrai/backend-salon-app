@@ -33,6 +33,16 @@ Salon_Schedule_router.get("/:id", async (req, res) => {
 					let servicename = await SalonServicesTable.findOne({
 						_id: result[i].service_id,
 					}).select({ serviceName: 1, _id: 0 });
+					// let datess = result[i].booking_date;
+					// let date_result = moment(datess).format("YYYY-MM-DD");
+					// console.log("afte changing date", date_result);
+					let starting_time = result[i].stating_time;
+					let ending = result[i].ending_time;
+					starting_time = moment(starting_time).format("HH:mm");
+					ending = moment(ending).format("HH:mm");
+					result[i].stating_time = starting_time;
+
+					result[i].ending_time = ending;
 					result[i].service_id = servicename["serviceName"];
 				}
 				console.log("result is", result);
