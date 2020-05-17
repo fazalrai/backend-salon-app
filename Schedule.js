@@ -125,8 +125,10 @@ ScheduleRouter.post("/", async (req, res) => {
 				customer_id: decode.id,
 				//gte
 			}).sort({ booking_date: 1 });
-			if (!appointment) res.status(400).send("no appintment exist");
-			//console.log("appoitnment is", appointment);
+			console.log("appoitnment is", appointment);
+
+			if (appointment.length == 0)
+				return res.status(400).send("no appointment  exist");
 			for (let i = 0; i < appointment.length; i++) {
 				// const f = moment(appointment[i].stating_time, "h:mm A");
 				// console.log("f is ", f);
@@ -138,9 +140,9 @@ ScheduleRouter.post("/", async (req, res) => {
 				let ending = appointment[i].ending_time;
 				starting_time = moment(starting_time).format("HH:mm");
 				ending = moment(ending).format("HH:mm");
-				result[i].stating_time = starting_time;
+				appointment[i].stating_time = starting_time;
 
-				result[i].ending_time = ending;
+				appointment[i].ending_time = ending;
 				let salon_name = await SalonTable.findById({
 					_id: appointment[i].Salon_id,
 				}).select({ SalonName: 1, _id: 0 });
