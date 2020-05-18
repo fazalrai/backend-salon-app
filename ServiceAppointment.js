@@ -200,6 +200,30 @@ ServiceAppointmentRouter.delete("/:id", async (req, res) => {
 		return res.status(400).send(exc.message);
 	}
 });
+
+ServiceAppointmentRouter.delete(
+	"/customer/unavailed/service/:id",
+	async (req, res) => {
+		try {
+			const token = req.header("x-auth-token");
+			if (!token)
+				return res.status(401).send("Access denied ,No token provided");
+
+			const decode = jwt.verify(token, "login_jwt_privatekey");
+			if (decode) {
+				const service = await ServiceAppointmentTable.findOne({
+					_id: req.params.id,
+				});
+				console.log("service is ", service);
+				const result = await service.remove();
+				return res.status(200).send("appointment cancelled successfuuly");
+			}
+		} catch (exc) {
+			return res.status(400).send(exc.message);
+		}
+	}
+);
+
 ServiceAppointmentRouter.post("/service/status/:id", async (req, res) => {
 	try {
 		const token = req.header("x-auth-token");
