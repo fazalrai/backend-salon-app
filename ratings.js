@@ -59,4 +59,4 @@ Reviews_router.post("/:id", async (req, res) => {
 	//const service = await SalonServicesTable.findById(req.params.id);
 	//const rating = service.ServiceAvgRating;
 });
-exports.Reviews = Reviews;
+module.exports.Reviews_router = Reviews_router;

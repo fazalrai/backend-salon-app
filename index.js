@@ -16,6 +16,8 @@ const service_appointment_router = require("./ServiceAppointment");
 const customer_schedule_router = require("./Schedule");
 const { Salon_Schedule_router } = require("./SalonSchedule");
 const { salon_availibilty_router } = require("./salon_availivilty");
+
+const { Reviews_router } = require("./ratings");
 const {
 	customer_recomendation_for_nearest_salon_router,
 } = require("./customer_recomendation_for_neraest_salon");
@@ -107,6 +109,7 @@ app.use(
 	"/Digital_Saloon.com/api/superadmin",
 	superadminrouter.SuperadminRouter
 );
+app.use("/Digital_Saloon.com/api/service/rating", Reviews_router);
 app.use(
 	"/Digital_Saloon.com/api/login/superadmin",
 	SuperAdmin_login_router.SuperAdmin_login_router
