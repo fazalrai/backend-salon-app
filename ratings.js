@@ -4,6 +4,7 @@ const Reviews_router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { SalonServicesTable } = require("./saloonServices");
+const { ServiceAppointmentTable } = require("./ServiceAppointment");
 
 const reviews = new mongoose.Schema({
 	user_id: {
@@ -31,9 +32,10 @@ Reviews_router.post("/:id", async (req, res) => {
 
 	const decode = jwt.verify(token, "login_jwt_privatekey");
 	if (!decode) return res.status(400).send("invalid token");
-	const service = await SalonServicesTable.findById(req.params.id);
+	const appointment = await ServiceAppointmentTable.findById(req.params.id);
+	const service = await SalonServicesTable.findById(appointment.service_id);
 	const rating_obj = await Reviews.findOne({
-		service_id: req.params.id,
+		service_id: service._id,
 	}).select({
 		count: 1,
 		rating: 1,
@@ -52,6 +54,7 @@ Reviews_router.post("/:id", async (req, res) => {
 		});
 
 		const result = await new_rating.save();
+		const delete_appointment = await appointment.remove();
 		return res.status(200).send(result);
 	} catch (exc) {
 		return res.status(400).send(exc.message);
