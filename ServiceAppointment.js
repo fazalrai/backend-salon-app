@@ -20,9 +20,8 @@ const ServiceAppointmentSchema = new monogoes.Schema({
 		//required: true
 	},
 	service_status: {
-		type: String,
-		//required: false,
-		enum: ["availed", "onqueue"],
+		type: Boolean,
+		required: true,
 	},
 	booking_date: {
 		type: Date,
@@ -108,7 +107,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 					booking_date: req.body.booking_date,
 					stating_time: request_boking_time,
 					ending_time: req_end_time,
-					service_status: "onqueue",
+					service_status: false,
 				});
 
 				try {
@@ -161,7 +160,7 @@ ServiceAppointmentRouter.post("/:id", async (req, res, next) => {
 							booking_date: req.body.booking_date,
 							stating_time: start_time,
 							ending_time: end_time,
-							service_status: "onqueue",
+							service_status: false,
 						});
 
 						try {
@@ -196,6 +195,25 @@ ServiceAppointmentRouter.delete("/:id", async (req, res) => {
 			console.log("service is ", service);
 			const result = await service.remove();
 			return res.status(200).send("appointment cancelled successfuuly");
+		}
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
+});
+ServiceAppointmentRouter.post("/service/status/:id", async (req, res) => {
+	try {
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
+
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			const service = await ServiceAppointmentTable.findOne({
+				_id: req.params.id,
+			});
+			service.service_status = req.body.service_status;
+			console.log("service is ", service);
+			const result = await service.save();
+			return res.status(200).send("service status updated successfuuly");
 		}
 	} catch (exc) {
 		return res.status(400).send(exc.message);
