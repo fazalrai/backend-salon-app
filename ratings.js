@@ -29,6 +29,8 @@ const reviews = new mongoose.Schema({
 
 const Reviews = mongoose.model("Reviews", reviews);
 Reviews_router.post("/:id", async (req, res) => {
+	console.log("hello");
+
 	const token = req.header("x-auth-token");
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 
@@ -38,17 +40,19 @@ Reviews_router.post("/:id", async (req, res) => {
 		const appointment = await ServiceAppointmentTable.findById(req.params.id);
 		if (!appointment) return res.status(400).send("invalid id");
 		const service = await SalonServicesTable.findById(appointment.service_id);
-		console.log("service", service);
 		if (!service) return res.status(400).send("invalid service id");
 		const rating_obj = await Reviews.findOne({
 			service_id: service._id,
-		}).select({
-			count: 1,
-			rating: 1,
-			_id: 0,
 		});
+		// }).select({
+		// 	count: 1,
+		// 	rating: 1,
+		// 	_id: 0,
+		// });
 		//console.log("appointment", service);
 		if (!rating_obj) {
+			console.log("if called");
+
 			try {
 				const new_rating = new Reviews({
 					service_id: service._id,
@@ -65,20 +69,30 @@ Reviews_router.post("/:id", async (req, res) => {
 				return res.status(400).send(exc.message);
 			}
 		}
+		console.log("rating obj", rating_obj);
 		let old_rating = rating_obj.rating;
-		old_rating = old_rating * rating_obj.count;
-		const new_ratings = old_rating + req.body.rating / rating_obj.count + 1;
+		//	old_rating = old_rating * rating_obj.count;
+		console.log("old rating", old_rating);
+		var count = rating_obj.count + 1;
+		console.log("old count", count);
+
+		var sum_of_old_and_new_rating = old_rating + req.body.rating;
+		console.log("sum", sum_of_old_and_new_rating);
+
+		let new_ratings = (sum_of_old_and_new_rating / count).toFixed(1);
+		console.log("new rating", new_ratings);
+
 		service.ServiceAvgRating = new_ratings;
+
 		try {
-			const new_rating = new Reviews({
-				service_id: service._id,
-				user_id: decode.id,
-				rating: rating_obj.rating + req.body.rating,
-				count: rating_obj.count + 1,
-			});
+			(rating_obj.rating = sum_of_old_and_new_rating),
+				(rating_obj.service_id = rating_obj.service_id),
+				(rating_obj.count = count),
+				(rating_obj._id = rating_obj._id);
+
+			const result = await rating_obj.save();
 
 			const update_avg_rating = await service.save();
-			const result = await new_rating.save();
 			const delete_appointment = await appointment.remove();
 			return res.status(200).send(result);
 		} catch (exc) {
