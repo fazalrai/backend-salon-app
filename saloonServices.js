@@ -41,7 +41,7 @@ const saloonServicesSchema = new monogoes.Schema({
 	service_category: { type: String, required: true },
 	Salon_id: { type: String, required: true },
 	service_time: { type: Number, required: true },
-	ServiceAvgRating: { type: Number },
+	ServiceAvgRating: { type: Number, default: 0 },
 });
 const SalonServicesTable = monogoes.model(
 	"SalonServicesTable",
