@@ -123,7 +123,6 @@ ScheduleRouter.post("/", async (req, res) => {
 			const appointment = await ServiceAppointmentTable.find({
 				booking_date: { $gte: only_date },
 				customer_id: decode.id,
-				service_status: true,
 				//gte
 			}).sort({ booking_date: 1 });
 			console.log("appoitnment is", appointment);
