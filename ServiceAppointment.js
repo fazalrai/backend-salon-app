@@ -200,6 +200,46 @@ ServiceAppointmentRouter.delete("/:id", async (req, res) => {
 		return res.status(400).send(exc.message);
 	}
 });
+ServiceAppointmentRouter.get("/favourites", async (req, res) => {
+	try {
+		const token = req.header("x-auth-token");
+		if (!token) return res.status(401).send("Access denied ,No token provided");
+
+		const decode = jwt.verify(token, "login_jwt_privatekey");
+		if (decode) {
+			let result = await ServiceAppointmentTable.aggregate([
+				{
+					$match: { customer_id: decode.id, service_status: true },
+				},
+				{
+					$group: {
+						_id: "$service_id",
+						count: { $sum: 1 },
+					},
+				},
+
+				{
+					$sort: { count: -1 },
+				},
+
+				{ $limit: 1 },
+			]);
+			if (result.length == 0)
+				return res.status(200).send("no favouite list yet");
+			var services = [];
+			for (let i = 0; i < result.length; i++) {
+				let single_service = await SalonServicesTable.findOne({
+					_id: result[i]._id,
+				});
+				console.log(single_service);
+				services.push(single_service);
+			}
+			return res.status(200).send(services);
+		}
+	} catch (exc) {
+		return res.status(400).send(exc.message);
+	}
+});
 
 ServiceAppointmentRouter.delete(
 	"/customer/unavailed/service/:id",

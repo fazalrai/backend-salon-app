@@ -63,7 +63,7 @@ Reviews_router.post("/:id", async (req, res) => {
 				service.ServiceAvgRating = req.body.rating;
 				const update_avg_rating = await service.save();
 				const result = await new_rating.save();
-				const delete_appointment = await appointment.remove();
+				//const delete_appointment = await appointment.remove();
 				return res.status(200).send(result);
 			} catch (exc) {
 				return res.status(400).send(exc.message);
@@ -93,7 +93,7 @@ Reviews_router.post("/:id", async (req, res) => {
 			const result = await rating_obj.save();
 
 			const update_avg_rating = await service.save();
-			const delete_appointment = await appointment.remove();
+			//const delete_appointment = await appointment.remove();
 			return res.status(200).send(result);
 		} catch (exc) {
 			return res.status(400).send(exc.message);
