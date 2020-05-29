@@ -27,10 +27,8 @@ const SalonSchema = new monogoes.Schema({
 		maxlength: 15,
 	},
 	SalonOwnerCnic: {
-		type: Number,
+		type: String,
 		required: true,
-		minlength: 10,
-		maxlength: 20,
 	},
 	SalonName: { type: String, required: true, minlength: 3 },
 	Salon_opening_hours: {
