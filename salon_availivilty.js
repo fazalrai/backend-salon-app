@@ -13,7 +13,7 @@ salon_availibilty_router.post("/", async (req, res) => {
 		if (decode) {
 			const salon = await SalonTable.findById(decode.id);
 			console.log("salon is", salon);
-			salon.Salon_availibilty = req.body.salon_availaible;
+			salon.Salon_availibilty = req.body.Salon_availibilty;
 			const result = await salon.save();
 			return res.status(200).send(result);
 		}
