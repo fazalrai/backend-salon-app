@@ -5,13 +5,15 @@ const { SalonTable } = require("./Salon_signup");
 const salon_availibilty_router = express.Router();
 
 salon_availibilty_router.post("/", async (req, res) => {
+	console.log(req.body.Salon_availibilty);
 	const token = req.header("x-auth-token");
+
 	if (!token) return res.status(401).send("Access denied ,No token provided");
 	try {
 		const decode = jwt.verify(token, "login_jwt_privatekey");
-
+		console.log(decode);
 		if (decode) {
-			const salon = await SalonTable.findById(decode.id);
+			const salon = await SalonTable.findOne({ _id: decode.id });
 			console.log("salon is", salon);
 			salon.Salon_availibilty = req.body.Salon_availibilty;
 			const result = await salon.save();
