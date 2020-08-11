@@ -16,6 +16,7 @@ salon_availibilty_router.post("/", async (req, res) => {
 			const salon = await SalonTable.findOne({ _id: decode.id });
 			console.log("salon is", salon);
 			salon.Salon_availibilty = req.body.Salon_availibilty;
+			console.log(salon);
 			const result = await salon.save();
 			return res.status(200).send(result);
 		}
